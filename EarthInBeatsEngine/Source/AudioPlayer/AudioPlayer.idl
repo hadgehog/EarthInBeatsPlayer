@@ -1,0 +1,45 @@
+namespace EarthInBeatsEngine.Audio
+{
+    interface ITrack
+    {
+        String GetName();
+        Int32 GetPosition();
+    }
+
+    interface IPlayList
+    {
+        void SortPlaylist();
+        ITrack GetTrack(Int32 trackIndex);
+        Windows.Storage.Streams.IRandomAccessStream GetStream(Int32 trackIndex);
+        String GetInfoAboutTrack(Int32 trackIndex);
+        Boolean CheckNext(Int32 trackIndex);
+        Int32 GetPlayListLength();
+    }
+
+    runtimeclass AudioPlayer
+    {
+        AudioPlayer();
+
+        void InitAudioPlayer(IPlayList playList);
+
+        void Play();
+        void Pause();
+        void Stop();
+
+        void Next();
+        void Previous();
+        void Rewind(Double position);
+
+        Windows.Foundation.TimeSpan Duration{ get; };
+
+        Single Volume { get; set; };
+
+        Int64 GetCurrentPosition();
+        Int64 GetGlobalDuration();
+
+        void ClearPlayList();
+
+        void EndOfRewindingTrack();
+        void EndOfPlayingTrack(Int32 idx);
+    }
+}
