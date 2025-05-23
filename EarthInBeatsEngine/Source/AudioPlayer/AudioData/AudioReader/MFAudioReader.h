@@ -6,12 +6,10 @@
 #include <mfidl.h>
 #include <mfreadwrite.h>
 #include <mfobjects.h>
-
-#include <wrl.h>
-
 #include <vector>
+#include <winrt/base.h>
+#include <winrt/Windows.Storage.Streams.h>
 
-// TODO: refactor all WRL::ComPtr to winrt::com_ptr
 class MFAudioReader : public IAudioReader
 {
 public:
@@ -28,16 +26,15 @@ public:
 	IAudioSample* ReadAudioSample() override;
 	void SetPosition(const Int64Rational& position) override;
 
-	// TODO: refactor to winrt::
-	void Initialize(Windows::Storage::Streams::IRandomAccessStream^ stream);
+	void Initialize(winrt::Windows::Storage::Streams::IRandomAccessStream stream);
 
 private:
-	Microsoft::WRL::ComPtr<IMFSourceReader> audioReader;
+	winrt::com_ptr<IMFSourceReader> audioReader;
 	std::vector<int32_t> audioStreamsArray;
 
 private:
-	Microsoft::WRL::ComPtr<IMFMediaType> GetType(int32_t index);
+	winrt::com_ptr<IMFMediaType> GetType(int32_t index);
 	void FindAudioStreamIndexes();
-	Microsoft::WRL::ComPtr<IMFSample> ReadSample();
+	winrt::com_ptr<IMFSample> ReadSample();
 	int64_t FindAudioDuration();
 };

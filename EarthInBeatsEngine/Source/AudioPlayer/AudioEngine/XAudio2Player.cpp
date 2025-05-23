@@ -24,13 +24,13 @@ XAudio2Player::~XAudio2Player()
 
 }
 
-void XAudio2Player::Initialize(std::shared_ptr<IAudioReader> iReader, Microsoft::WRL::ComPtr<IXAudio2> iXAudio2, std::shared_ptr<IAudioEvents> iEvents)
+void XAudio2Player::Initialize(std::shared_ptr<IAudioReader> iReader, winrt::com_ptr<IXAudio2> iXAudio2, std::shared_ptr<IAudioEvents> iEvents)
 {
 	this->audioEvents = iEvents;
 	this->SetAudioData(iReader, iXAudio2);
 }
 
-void XAudio2Player::SetAudioData(std::shared_ptr<IAudioReader> iReader, Microsoft::WRL::ComPtr<IXAudio2> ixAudio2)
+void XAudio2Player::SetAudioData(std::shared_ptr<IAudioReader> iReader, winrt::com_ptr<IXAudio2> ixAudio2)
 {
 	HRESULT hr = S_OK;
 	WAVEFORMATEX* wF;

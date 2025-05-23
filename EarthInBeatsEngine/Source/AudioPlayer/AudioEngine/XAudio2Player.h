@@ -2,7 +2,7 @@
 
 #include "..\AudioData\AudioReader\IAudioReader.h"
 
-#include <wrl.h>
+#include <winrt/base.h>
 #include <xaudio2.h>
 #include <memory>
 #include <mutex>
@@ -14,15 +14,14 @@ struct SourceVoiceDeleter
 	void operator()(IXAudio2SourceVoice* obj);
 };
 
-// TODO: refactor all WRL::ComPtr to winrt::com_ptr
 class XAudio2Player : public IXAudio2VoiceCallback
 {
 public:
 	XAudio2Player();
 	~XAudio2Player();
 
-	void Initialize(std::shared_ptr<IAudioReader> iReader, Microsoft::WRL::ComPtr<IXAudio2> ixAudio2, std::shared_ptr<IAudioEvents> iEvents);
-	void SetAudioData(std::shared_ptr<IAudioReader> iReader, Microsoft::WRL::ComPtr<IXAudio2> ixAudio2);
+	void Initialize(std::shared_ptr<IAudioReader> iReader, winrt::com_ptr<IXAudio2> ixAudio2, std::shared_ptr<IAudioEvents> iEvents);
+	void SetAudioData(std::shared_ptr<IAudioReader> iReader, winrt::com_ptr<IXAudio2> ixAudio2);
 
 	void Play();
 	void Pause();
@@ -35,7 +34,7 @@ public:
 	void GoToNextSong();
 
 private:
-	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
+	winrt::com_ptr<IXAudio2> xAudio2;
 	std::shared_ptr<IXAudio2SourceVoice> sourceVoice;
 	std::shared_ptr<IAudioReader> audioReader;
 	int64_t currentPosition;

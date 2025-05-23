@@ -7,11 +7,11 @@
 
 #include <mutex>
 #include <memory>
+#include <winrt/base.h>
 #include <winrt/Windows.Foundation.h>
 
 namespace winrt::EarthInBeatsEngine::Audio::implementation
 {
-    // TODO: refactor all WRL::ComPtr to winrt::com_ptr
     struct AudioPlayer : AudioPlayerT<AudioPlayer>
     {
         AudioPlayer();
@@ -41,8 +41,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         void EndOfPlayingTrack(int32_t idx);
 
     private:
-        // TODO: refactor to winrt::com_ptr if possible
-        Microsoft::WRL::ComPtr<IXAudio2> xAudio2 { nullptr };
+        winrt::com_ptr<IXAudio2> xAudio2 { nullptr };
         IPlayList currentPlayList { nullptr };
         std::shared_ptr<IAudioEvents> audioEvents { nullptr };
         std::mutex lockPlayList;
@@ -56,8 +55,6 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
     private:
         void FindGlobalDuration();
         int64_t FindSongDurationFromPlayList(int trackIndex);
-        // TODO: if conversion will not work, pass winrt stream to C++ Core
-        ::Windows::Storage::Streams::IRandomAccessStream^ ConvertToIRandomAccessStream(IUnknown* rawPtr);
     };
 }
 

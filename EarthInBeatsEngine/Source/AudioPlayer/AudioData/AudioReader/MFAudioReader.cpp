@@ -21,7 +21,7 @@ size_t MFAudioReader::GetAudioStreamCount()
 uint32_t MFAudioReader::GetAudioChannelCount(int32_t index)
 {
 	uint32_t channelCount;
-	Microsoft::WRL::ComPtr<IMFMediaType> type = GetType(index);
+	winrt::com_ptr<IMFMediaType> type = GetType(index);
 	type->GetUINT32(MF_MT_AUDIO_NUM_CHANNELS, &channelCount);
 	return channelCount;
 }
@@ -29,7 +29,7 @@ uint32_t MFAudioReader::GetAudioChannelCount(int32_t index)
 uint32_t MFAudioReader::GetSampleRate(int32_t index)
 {
 	uint32_t sampleRate;
-	Microsoft::WRL::ComPtr<IMFMediaType> type = GetType(index);
+	winrt::com_ptr<IMFMediaType> type = GetType(index);
 	type->GetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND, &sampleRate);
 	return sampleRate;
 }
@@ -38,7 +38,7 @@ AudioSampleType MFAudioReader::GetStreamType(int32_t audioIdx)
 {
 	HRESULT hr = S_OK;
 	GUID tmpGuidType;
-	Microsoft::WRL::ComPtr<IMFMediaType> realStreamType = GetType(audioIdx);
+	winrt::com_ptr<IMFMediaType> realStreamType = GetType(audioIdx);
 
 	hr = realStreamType->GetGUID(MF_MT_SUBTYPE, &tmpGuidType);
 
@@ -55,10 +55,10 @@ AudioSampleType MFAudioReader::GetStreamType(int32_t audioIdx)
 void MFAudioReader::GetWaveInfo(int32_t audioIdx, WAVEFORMATEX* &waveType, uint32_t& waveLength)
 {
 	HRESULT hr = S_OK;
-	Microsoft::WRL::ComPtr<IMFMediaType> streamType;
+	winrt::com_ptr<IMFMediaType> streamType;
 	int32_t audioStreamIndex = this->audioStreamsArray.at(audioIdx);
-	hr = this->audioReader->GetCurrentMediaType(audioStreamIndex, &streamType);
-	hr = MFCreateWaveFormatExFromMFMediaType(streamType.Get(), &waveType, &waveLength);
+	hr = this->audioReader->GetCurrentMediaType(audioStreamIndex, streamType.put());
+	hr = MFCreateWaveFormatExFromMFMediaType(streamType.get(), &waveType, &waveLength);
 }
 
 Int64Rational MFAudioReader::GetAudioDuration()
@@ -73,7 +73,7 @@ Int64Rational MFAudioReader::GetAudioDuration()
 IAudioSample* MFAudioReader::ReadAudioSample()
 {
 	MFAudioSample* sample = nullptr;
-	Microsoft::WRL::ComPtr<IMFSample> audioSample = ReadSample();
+	winrt::com_ptr<IMFSample> audioSample = ReadSample();
 
 	if (audioSample)
 	{
@@ -98,35 +98,35 @@ void MFAudioReader::SetPosition(const Int64Rational& position)
 	hr = this->audioReader->SetCurrentPosition(GUID_NULL, varPos);
 }
 
-void MFAudioReader::Initialize(Windows::Storage::Streams::IRandomAccessStream^ stream)
+void MFAudioReader::Initialize(winrt::Windows::Storage::Streams::IRandomAccessStream stream)
 {
 	HRESULT hr = S_OK;
-	Microsoft::WRL::ComPtr<IMFByteStream> byteStream;
-	Microsoft::WRL::ComPtr<IMFMediaType> mediaType;
-	Microsoft::WRL::ComPtr<IMFAttributes> mfAttributes;
+	winrt::com_ptr<IMFByteStream> byteStream;
+	winrt::com_ptr<IMFMediaType> mediaType;
+	winrt::com_ptr<IMFAttributes> mfAttributes;
 
 	Auto::getInstance();
 
-	hr = MFCreateMFByteStreamOnStreamEx((IUnknown*)stream, byteStream.GetAddressOf());
+	hr = MFCreateMFByteStreamOnStreamEx(winrt::get_unknown(stream), byteStream.put());
 
 	if (SUCCEEDED(hr))
 	{
-		hr = MFCreateAttributes(&mfAttributes, 1);
+		hr = MFCreateAttributes(mfAttributes.put(), 1);
 		hr = mfAttributes->SetUINT32(MF_LOW_LATENCY, TRUE);
-		hr = MFCreateSourceReaderFromByteStream(byteStream.Get(), mfAttributes.Get(), this->audioReader.GetAddressOf());
+		hr = MFCreateSourceReaderFromByteStream(byteStream.get(), mfAttributes.get(), this->audioReader.put());
 	}
 
 	this->FindAudioStreamIndexes();
 
 	if (!this->audioStreamsArray.empty())
 	{
-		hr = MFCreateMediaType(mediaType.GetAddressOf());
+		hr = MFCreateMediaType(mediaType.put());
 		hr = mediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 		hr = mediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_Float);
 
 		if (SUCCEEDED(hr))
 		{
-			hr = this->audioReader->SetCurrentMediaType(0, NULL, mediaType.Get());
+			hr = this->audioReader->SetCurrentMediaType(0, NULL, mediaType.get());
 		}
 
 		if (FAILED(hr))
@@ -136,12 +136,12 @@ void MFAudioReader::Initialize(Windows::Storage::Streams::IRandomAccessStream^ s
 	}
 }
 
-Microsoft::WRL::ComPtr<IMFMediaType> MFAudioReader::GetType(int32_t index)
+winrt::com_ptr<IMFMediaType> MFAudioReader::GetType(int32_t index)
 {
 	HRESULT hr = S_OK;
-	Microsoft::WRL::ComPtr<IMFMediaType> type;
+	winrt::com_ptr<IMFMediaType> type;
 	int32_t audioStreamIndex = this->audioStreamsArray.at(index);
-	hr = this->audioReader->GetCurrentMediaType(audioStreamIndex, type.GetAddressOf());
+	hr = this->audioReader->GetCurrentMediaType(audioStreamIndex, type.put());
 	return type;
 }
 
@@ -149,12 +149,12 @@ void MFAudioReader::FindAudioStreamIndexes()
 {
 	HRESULT hr = S_OK;
 	DWORD dwStreamIndex = 0;
-	Microsoft::WRL::ComPtr<IMFMediaType> mediaType;
+	winrt::com_ptr<IMFMediaType> mediaType;
 	GUID type;
 
 	while (SUCCEEDED(hr))
 	{
-		hr = this->audioReader->GetCurrentMediaType(dwStreamIndex, &mediaType);
+		hr = this->audioReader->GetCurrentMediaType(dwStreamIndex, mediaType.put());
 
 		if (SUCCEEDED(hr))
 		{
@@ -169,19 +169,19 @@ void MFAudioReader::FindAudioStreamIndexes()
 	}
 }
 
-Microsoft::WRL::ComPtr<IMFSample> MFAudioReader::ReadSample()
+winrt::com_ptr<IMFSample> MFAudioReader::ReadSample()
 {
 	HRESULT hr = S_OK;
 	DWORD streamIndex, flags;
 	LONGLONG timeStamp;
-	Microsoft::WRL::ComPtr<IMFSample> sample;
-	Microsoft::WRL::ComPtr<IMFMediaType> tmpType;
+	winrt::com_ptr<IMFSample> sample;
+	winrt::com_ptr<IMFMediaType> tmpType;
 
-	hr = this->audioReader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &streamIndex, &flags, &timeStamp, sample.GetAddressOf());
+	hr = this->audioReader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &streamIndex, &flags, &timeStamp, sample.put());
 
 	if (SUCCEEDED(hr))
 	{
-		hr = this->audioReader->GetCurrentMediaType(streamIndex, &tmpType);
+		hr = this->audioReader->GetCurrentMediaType(streamIndex, tmpType.put());
 	}
 	else
 	{

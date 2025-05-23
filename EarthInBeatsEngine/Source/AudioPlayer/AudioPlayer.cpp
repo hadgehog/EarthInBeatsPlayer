@@ -47,10 +47,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
             }
             //std::dynamic_pointer_cast<MFAudioEvents>(this->audioEvents)->InitEvent(this);
 
-            ::Windows::Storage::Streams::IRandomAccessStream^ stream;
-            winrt::Windows::Storage::Streams::IRandomAccessStream winrtStream = this->currentPlayList.GetStream(i);
-            IUnknown* rawStream = winrt::get_unknown(winrtStream);
-            stream = this->ConvertToIRandomAccessStream(rawStream);
+            winrt::Windows::Storage::Streams::IRandomAccessStream stream = this->currentPlayList.GetStream(i);
 
             reader->Initialize(stream);
             player->Initialize(reader, this->xAudio2, this->audioEvents);
@@ -245,12 +242,8 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
     int64_t AudioPlayer::FindSongDurationFromPlayList(int trackIndex)
     {
         int64_t convertSongDuration = 0;
-        ::Windows::Storage::Streams::IRandomAccessStream^ stream;
         auto reader = std::make_unique<MFAudioReader>(MFAudioReader());
-        auto winrtStream = this->currentPlayList.GetStream(trackIndex);
-
-        IUnknown* rawStream = winrt::get_unknown(winrtStream);
-        stream = this->ConvertToIRandomAccessStream(rawStream);
+        auto stream = this->currentPlayList.GetStream(trackIndex);
 
         reader->Initialize(stream);
 
@@ -259,11 +252,5 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         convertSongDuration = pos.value;
 
         return convertSongDuration;
-    }
-
-    ::Windows::Storage::Streams::IRandomAccessStream^ AudioPlayer::ConvertToIRandomAccessStream(IUnknown* rawPtr)
-    {
-        // possibly does not work. if so - refactor MFAudioReader to use winrt IRandomAccessStream
-        return reinterpret_cast<::Windows::Storage::Streams::IRandomAccessStream^>(rawPtr);
     }
 }

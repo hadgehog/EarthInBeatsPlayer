@@ -40,11 +40,11 @@ void MFAudioSample::Unlock(void* buffer, uint64_t size)
 	hr = this->sampleBuffer->Unlock();
 }
 
-void MFAudioSample::Initialize(Microsoft::WRL::ComPtr<IMFSample> sample)
+void MFAudioSample::Initialize(winrt::com_ptr<IMFSample> sample)
 {
 	HRESULT hr = S_OK;
 	Auto::getInstance();
 	hr = sample->GetSampleDuration(&this->sampleDuration);
 	hr = sample->GetSampleTime(&this->sampleTime);
-	hr = sample->ConvertToContiguousBuffer(&this->sampleBuffer);
+	hr = sample->ConvertToContiguousBuffer(this->sampleBuffer.put());
 }

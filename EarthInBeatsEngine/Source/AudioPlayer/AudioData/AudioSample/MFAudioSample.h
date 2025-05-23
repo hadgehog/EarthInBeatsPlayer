@@ -5,7 +5,7 @@
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mfobjects.h>
-#include <wrl.h>
+#include <winrt/base.h>
 
 class MFAudioSample : public IAudioSample
 {
@@ -16,7 +16,7 @@ public:
 	int64_t GetDuration() override;
 	int64_t GetSampleTime() override;
 
-	void Initialize(Microsoft::WRL::ComPtr<IMFSample> sample);
+	void Initialize(winrt::com_ptr<IMFSample> sample);
 
 protected:
 	void Lock(void** buffer, uint64_t* size) override;
@@ -25,5 +25,5 @@ protected:
 private:
 	int64_t sampleTime;
 	int64_t sampleDuration;
-	Microsoft::WRL::ComPtr<IMFMediaBuffer> sampleBuffer;
+	winrt::com_ptr<IMFMediaBuffer> sampleBuffer;
 };

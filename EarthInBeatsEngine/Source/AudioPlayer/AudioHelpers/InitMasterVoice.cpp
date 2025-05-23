@@ -7,7 +7,7 @@
 InitMasterVoice::InitMasterVoice()
 {
 	HRESULT hr = S_OK;
-	hr = XAudio2Create(&this->xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	hr = XAudio2Create(this->xAudio2.put(), 0, XAUDIO2_DEFAULT_PROCESSOR);
 	hr = this->xAudio2->CreateMasteringVoice(&this->masterVoice, XAUDIO2_DEFAULT_CHANNELS, 0, 0, nullptr, nullptr, AudioCategory_Media);
 }
 
@@ -22,7 +22,7 @@ InitMasterVoice &InitMasterVoice::GetInstance()
 	return instance;
 }
 
-Microsoft::WRL::ComPtr<IXAudio2> InitMasterVoice::GetXAudio()
+winrt::com_ptr<IXAudio2> InitMasterVoice::GetXAudio()
 {
 	return this->xAudio2;
 }
