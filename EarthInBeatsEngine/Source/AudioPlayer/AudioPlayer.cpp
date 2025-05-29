@@ -74,7 +74,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
 
     void AudioPlayer::Pause()
     {
-        if (this->playersList.at(this->currentPlayerIndex))
+        if (this->playersList.at(this->currentPlayerIndex) && this->isPlayingNow)
         {
             this->isPauseOccurs = true;
             this->playersList.at(this->currentPlayerIndex)->Pause();
@@ -155,7 +155,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         }
     }
 
-    winrt::Windows::Foundation::TimeSpan AudioPlayer::Duration()
+    winrt::Windows::Foundation::TimeSpan AudioPlayer::Duration() const
     {        
         if (this->playersList.at(this->currentPlayerIndex))
         {
@@ -182,7 +182,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         }
     }
 
-    int64_t AudioPlayer::GetCurrentPosition()
+    int64_t AudioPlayer::GetCurrentPosition() const
     {
         if (this->playersList.at(this->currentPlayerIndex))
         {
@@ -192,13 +192,23 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         return 0;
     }
 
-    int64_t AudioPlayer::GetGlobalDuration()
+    int64_t AudioPlayer::GetGlobalDuration() const
     {
         return this->globalDuration;
     }
 
+    bool AudioPlayer::IsPlayingNow() const
+    {
+        return this->isPlayingNow;
+    }
+
     void AudioPlayer::ClearPlayList()
     {
+        if (this->isPlayingNow)
+        {
+            this->Stop();
+        }
+
         this->currentPlayList = nullptr;
         this->playersList.clear();
         this->tracksInfo.clear();
@@ -209,7 +219,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
 
     }
 
-    void AudioPlayer::EndOfPlayingTrack(int32_t idx)
+    void AudioPlayer::EndOfPlayingTrack(int32_t nextIdx)
     {
         if (this->playersList.at(this->currentPlayerIndex))
         {
@@ -227,8 +237,20 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
             else
             {
                 this->currentPlayerIndex--;
+                this->Stop();
+                this->playListEndedEvent(*this, this->isPlayingNow);
             }
         }
+    }
+
+    winrt::event_token AudioPlayer::PlayListEnded(const Windows::Foundation::EventHandler<bool>& handler)
+    {
+        return this->playListEndedEvent.add(handler);
+    }
+
+    void AudioPlayer::PlayListEnded(const winrt::event_token& token)
+    {
+        this->playListEndedEvent.remove(token);
     }
 
     void AudioPlayer::FindGlobalDuration()

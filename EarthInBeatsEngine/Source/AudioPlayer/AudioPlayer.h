@@ -10,6 +10,8 @@
 #include <winrt/base.h>
 #include <winrt/Windows.Foundation.h>
 
+// TODO: refactor includes, get rid of extra winapi includes, maybe add pch.h to manage dependencies
+
 namespace winrt::EarthInBeatsEngine::Audio::implementation
 {
     struct AudioPlayer : AudioPlayerT<AudioPlayer>
@@ -27,18 +29,23 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         void Previous();
         void Rewind(double position);
 
-        winrt::Windows::Foundation::TimeSpan Duration();
+        winrt::Windows::Foundation::TimeSpan Duration() const;
 
         float Volume() const;
         void Volume(float volume);
 
-        int64_t GetCurrentPosition();
-        int64_t GetGlobalDuration();
+        int64_t GetCurrentPosition() const;
+        int64_t GetGlobalDuration() const;
+
+        bool IsPlayingNow() const;
 
         void ClearPlayList();
 
         void EndOfRewindingTrack();
-        void EndOfPlayingTrack(int32_t idx);
+        void EndOfPlayingTrack(int32_t nextIdx);
+
+        winrt::event_token PlayListEnded(const Windows::Foundation::EventHandler<bool>& handler);
+        void PlayListEnded(const winrt::event_token& token);
 
     private:
         winrt::com_ptr<IXAudio2> xAudio2 { nullptr };
@@ -51,6 +58,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         std::vector<winrt::hstring> tracksInfo;
         bool isPauseOccurs { false };
         bool isPlayingNow { false };
+        winrt::event<Windows::Foundation::EventHandler<bool>> playListEndedEvent;
 
     private:
         void FindGlobalDuration();

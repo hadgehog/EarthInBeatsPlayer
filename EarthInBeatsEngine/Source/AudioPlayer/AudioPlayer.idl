@@ -30,16 +30,21 @@ namespace EarthInBeatsEngine.Audio
         void Previous();
         void Rewind(Double position);
 
-        Windows.Foundation.TimeSpan Duration{ get; };
+        Windows.Foundation.TimeSpan Duration { get; };
 
         Single Volume { get; set; };
 
         Int64 GetCurrentPosition();
         Int64 GetGlobalDuration();
 
+        Boolean IsPlayingNow { get; };
+
         void ClearPlayList();
 
         void EndOfRewindingTrack();
-        void EndOfPlayingTrack(Int32 idx);
+        void EndOfPlayingTrack(Int32 nextIdx);
+
+        // TODO: rework to simple delegate without parameter
+        event Windows.Foundation.EventHandler<Boolean> PlayListEnded;
     }
 }

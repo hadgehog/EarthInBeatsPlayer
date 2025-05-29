@@ -97,7 +97,7 @@ int64_t XAudio2Player::GetCurrentPosition()
 {
 	int64_t physCurrPos = 0;
 	Int64Rational tmpPos(this->currentPosition, Int64Rational::Unit::HNS);
-	Int64Rational pos(static_cast<Int64Rational::Type>(tmpPos.Convert_cr(Int64Rational::Unit::SEC).value), Int64Rational::Unit::SEC);
+	Int64Rational pos(static_cast<Int64Rational::Type>(tmpPos.ConvertCeil_cr(Int64Rational::Unit::SEC).value), Int64Rational::Unit::SEC);
 	physCurrPos = pos.value;
 
 	return physCurrPos;
@@ -145,14 +145,14 @@ void XAudio2Player::SubmitBuffer()
 		return;
 	}
 
-	if (this->notifiedRewinding == false)
+	if (!this->notifiedRewinding)
 	{
 		// TODO: refactor to use MFAudioSample and make_unique
 		std::unique_ptr<IAudioSample> sample = std::unique_ptr<IAudioSample>(this->audioReader->ReadAudioSample());
 
 		if (sample)
 		{
-			sample->GetData([&](void *buffer, uint64_t size)
+			sample->GetData([&](void* buffer, uint64_t size)
 			{
 				XAUDIO2_BUFFER xbuffer = { 0 };
 				xbuffer.AudioBytes = (uint32_t)size;
@@ -171,6 +171,7 @@ void XAudio2Player::SubmitBuffer()
 			if (this->audioEvents)
 			{
 				this->stopped = true;
+
 				concurrency::create_task([=]()
 				{
 					this->sourceVoice->Stop();

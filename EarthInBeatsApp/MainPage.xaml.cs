@@ -3,13 +3,17 @@ using EarthInBeatsEngine.Audio;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Input;
 
 namespace EarthInBeatsApp
@@ -32,9 +36,45 @@ namespace EarthInBeatsApp
         private AudioPlayer audioPlayer = null;
         private PlayList playList = null;
 
+        private CoreDispatcher dispatcher = CoreApplication.MainView.Dispatcher;
+        private bool isDragging = false;
+
         public MainPage()
         {
             this.InitializeComponent();
+
+            this.VolumeSlider.Value = 70.0;
+            this.VolumeSlider.Maximum = 100.0;
+            this.ProgressSlider.Value = 0.0;
+            this.ProgressSlider.Maximum = 100.0;
+        }
+
+        private async void StartProgress()
+        {
+            while (this.audioPlayer != null &&
+                   this.audioPlayer.IsPlayingNow &&
+                   this.audioPlayer.Duration.Ticks > 0 &&
+                   this.audioPlayer.GetCurrentPosition() <= this.audioPlayer.Duration.Ticks)
+            {
+                await this.dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                {
+                    if (!this.isDragging)
+                    {
+                        var duration = this.audioPlayer.Duration.Ticks;
+                        var currentPos = this.audioPlayer.GetCurrentPosition();
+
+                        this.ProgressSlider.Value = (currentPos * 100.0) / duration;
+                    }
+
+                });
+
+                await Task.Delay(TimeSpan.FromSeconds(1.0));
+            }
+        }
+
+        private void StopProgress()
+        {
+            this.dispatcher.StopProcessEvents();
         }
 
         private void Previous_Click(object sender, RoutedEventArgs e)
@@ -47,7 +87,7 @@ namespace EarthInBeatsApp
 
         private async void PlayPauseBtn_Checked(object sender, RoutedEventArgs e)
         {
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 this.PlayPauseBtn.Icon = new SymbolIcon(Symbol.Pause);
             });
@@ -56,12 +96,13 @@ namespace EarthInBeatsApp
             {
                 this.audioPlayer.Volume = (float)this.VolumeSlider.Value / 100;
                 this.audioPlayer.Play();
+                this.StartProgress();
             }
         }
 
         private async void PlayPauseBtn_Unchecked(object sender, RoutedEventArgs e)
         {
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 this.PlayPauseBtn.Icon = new SymbolIcon(Symbol.Play);
             });
@@ -69,18 +110,23 @@ namespace EarthInBeatsApp
             if (this.audioPlayer != null)
             {
                 this.audioPlayer.Pause();
+                this.StopProgress();
             }
         }
 
-        private void Stop_Click(object sender, RoutedEventArgs e)
+        private async void Stop_Click(object sender, RoutedEventArgs e)
         {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                this.ProgressSlider.Value = 0;
+                this.PlayPauseBtn.IsChecked = false;
+            });
+
             if (this.audioPlayer != null)
             {
                 this.audioPlayer.Stop();
+                this.StopProgress();
             }
-
-            this.ProgressSlider.Value = 0;
-            this.PlayPauseBtn.IsChecked = false;
         }
 
         private void Next_Click(object sender, RoutedEventArgs e)
@@ -106,7 +152,7 @@ namespace EarthInBeatsApp
             filePicker.FileTypeFilter.Add(".mp4");
             filePicker.FileTypeFilter.Add(".wave");
 
-            //TODO correct convertion to List !!!!
+            //TODO correct conversion to List !!!!
             var pickedFilesTmp = await filePicker.PickMultipleFilesAsync();
             var pickedFiles = new List<StorageFile>(pickedFilesTmp);
 
@@ -136,11 +182,20 @@ namespace EarthInBeatsApp
                     //init players list
                     this.audioPlayer = new AudioPlayer();
                     this.audioPlayer.InitAudioPlayer(this.playList);
+
+                    this.audioPlayer.PlayListEnded += AudioPlayer_PlayListEnded;
                 }
                 else
                 {
                     // add tracks to existing playlist
                     this.audioPlayer.Stop();  // TODO: add new tracks without stopping
+
+                    // dumb check
+                    if (this.playList == null)
+                    {
+                        this.playList = new PlayList();
+                    }
+
                     this.playList.AddTracksToExistingPlayList(names, streams, pickedFiles);
                     this.audioPlayer.InitAudioPlayer(this.playList);
                 }
@@ -156,12 +211,15 @@ namespace EarthInBeatsApp
                     this.audioPlayer.Stop();
                     this.audioPlayer.ClearPlayList();
 
+                    this.audioPlayer.PlayListEnded -= AudioPlayer_PlayListEnded;
+
                     this.ProgressSlider.Value = 0.0;
+                    this.PlayPauseBtn.IsChecked = false;
 
                     GC.Collect();
 
-                    this.audioPlayer = null;
                     this.playList = null;
+                    this.audioPlayer = null;
                 }
             }
         }
@@ -175,7 +233,7 @@ namespace EarthInBeatsApp
         {
             this.isHoveringVolume = true;
 
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 this.VolumeSlider.Visibility = Visibility.Visible;
             });
@@ -201,7 +259,7 @@ namespace EarthInBeatsApp
                 repeatMode = RepeatMode.None;
             }
 
-            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 switch (repeatMode)
                 {
@@ -224,17 +282,10 @@ namespace EarthInBeatsApp
 
         private void VolumeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-
-        }
-
-        private void VolumeSlider_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
-        {
-
-        }
-
-        private void VolumeSlider_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
-        {
-
+            if (this.audioPlayer != null)
+            {
+                this.audioPlayer.Volume = (float)e.NewValue / 100;
+            }
         }
 
         private void ProgressSlider_PointerPressed(object sender, PointerRoutedEventArgs e)
@@ -273,11 +324,21 @@ namespace EarthInBeatsApp
 
             if (!this.isHoveringVolume)
             {
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     this.VolumeSlider.Visibility = Visibility.Collapsed;
                 });
             }
+        }
+
+
+        private async void AudioPlayer_PlayListEnded(object sender, bool e)
+        {
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                this.ProgressSlider.Value = 0;
+                this.PlayPauseBtn.IsChecked = false;
+            });
         }
     }
 }
