@@ -30,7 +30,15 @@
                       VerticalAlignment="Top"
                       HorizontalAlignment="Left"
                       Click="ClearPlaylist_Click"
-                      Margin="0,50,0,0"/>
+                      Margin="0,60,0,0"/>
+
+        <AppBarButton x:Name="ShowCurrentPlaylist" 
+                      Label="Show" 
+                      Icon="MusicInfo"
+                      VerticalAlignment="Top"
+                      HorizontalAlignment="Left"
+                      Click="ShowCurrentPlaylist_Click"
+                      Margin="0,120,0,0"/>
 
         <Slider x:Name="ProgressSlider" 
                 PointerPressed="ProgressSlider_PointerPressed"
@@ -39,9 +47,7 @@
                 HorizontalAlignment="Stretch" 
                 Margin="10,0,10,44" 
                 IsThumbToolTipEnabled="True"
-                ValueChanged="ProgressSlider_ValueChanged"
-                ManipulationMode="TranslateRailsX" 
-                ManipulationCompleted="ProgressSlider_ManipulationCompleted"/>
+                ManipulationMode="TranslateRailsX"/>
 
         <Grid Background="LightGray"
               Height="42"
@@ -83,7 +89,7 @@
                 </StackPanel>
 
                 <TextBlock x:Name="TrackTimeText"
-                           Text="1:42/5:31"
+                           Text="00:00/00:00"
                            VerticalAlignment="Center"
                            FontSize="13"
                            Foreground="DimGray"

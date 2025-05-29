@@ -29,13 +29,13 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         void Previous();
         void Rewind(double position);
 
+        // TODO: fix these methods to return true TimeSpan in sec:min format
         winrt::Windows::Foundation::TimeSpan Duration() const;
+        winrt::Windows::Foundation::TimeSpan GlobalDuration() const;
+        winrt::Windows::Foundation::TimeSpan CurrentPosition() const;
 
         float Volume() const;
         void Volume(float volume);
-
-        int64_t GetCurrentPosition() const;
-        int64_t GetGlobalDuration() const;
 
         bool IsPlayingNow() const;
 

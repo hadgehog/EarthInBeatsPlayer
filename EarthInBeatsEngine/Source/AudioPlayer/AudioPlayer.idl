@@ -38,11 +38,10 @@ namespace EarthInBeatsEngine.Audio
         void Rewind(Double position);
 
         Windows.Foundation.TimeSpan Duration { get; };
+        Windows.Foundation.TimeSpan GlobalDuration { get; };
+        Windows.Foundation.TimeSpan CurrentPosition { get; };
 
         Single Volume { get; set; };
-
-        Int64 GetCurrentPosition();
-        Int64 GetGlobalDuration();
 
         Boolean IsPlayingNow { get; };
 

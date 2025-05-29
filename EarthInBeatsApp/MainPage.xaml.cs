@@ -1,5 +1,6 @@
 ﻿using EarthInBeatsApp.AudioData;
 using EarthInBeatsEngine.Audio;
+using ProtoBuf.WellKnownTypes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,6 +50,8 @@ namespace EarthInBeatsApp
             this.ProgressSlider.Value = 0.0;
             this.ProgressSlider.Maximum = 100.0;
 
+            this.TrackTimeText.Text = "00:00/00:00";
+
             this.ProgressSlider.AddHandler(PointerPressedEvent, new PointerEventHandler(ProgressSlider_PointerPressed), true);
             this.ProgressSlider.AddHandler(PointerReleasedEvent, new PointerEventHandler(ProgressSlider_PointerReleased), true);
         }
@@ -58,16 +61,13 @@ namespace EarthInBeatsApp
             while (this.audioPlayer != null &&
                    this.audioPlayer.IsPlayingNow &&
                    this.audioPlayer.Duration.Ticks > 0 &&
-                   this.audioPlayer.GetCurrentPosition() <= this.audioPlayer.Duration.Ticks)
+                   this.audioPlayer.CurrentPosition.Ticks <= this.audioPlayer.Duration.Ticks)
             {
                 await this.dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
                 {
                     if (!this.isDragging)
                     {
-                        var duration = this.audioPlayer.Duration.Ticks;
-                        var currentPos = this.audioPlayer.GetCurrentPosition();
-
-                        this.ProgressSlider.Value = (currentPos * 100.0) / duration;
+                        this.UpdatePlaybackProgress();
                     }
 
                 });
@@ -79,6 +79,22 @@ namespace EarthInBeatsApp
         private void StopProgress()
         {
             this.dispatcher.StopProcessEvents();
+        }
+
+        private void UpdatePlaybackProgress()
+        {
+            var duration = this.audioPlayer.Duration.Ticks;
+            var currentPos = this.audioPlayer.CurrentPosition.Ticks;
+
+            this.ProgressSlider.Value = (currentPos * 100.0) / duration;
+
+            TimeSpan timeCurr = TimeSpan.FromSeconds(currentPos);
+            TimeSpan timeOverall = TimeSpan.FromSeconds(duration);
+
+            string currStr = timeCurr.ToString(@"mm\:ss");
+            string overallStr = timeOverall.ToString(@"mm\:ss");
+
+            this.TrackTimeText.Text = currStr + "/" + overallStr;
         }
 
         private void Previous_Click(object sender, RoutedEventArgs e)
@@ -124,6 +140,12 @@ namespace EarthInBeatsApp
             {
                 this.ProgressSlider.Value = 0;
                 this.PlayPauseBtn.IsChecked = false;
+
+                var duration = this.audioPlayer.Duration.Ticks;
+                TimeSpan timeOverall = TimeSpan.FromSeconds(duration);
+                string overallStr = timeOverall.ToString(@"mm\:ss");
+
+                this.TrackTimeText.Text = "00:00/" + overallStr;
             });
 
             if (this.audioPlayer != null)
@@ -228,7 +250,7 @@ namespace EarthInBeatsApp
             }
         }
 
-        private void MyPlaylists_Click(object sender, RoutedEventArgs e)
+        private void ShowCurrentPlaylist_Click(object sender, RoutedEventArgs e)
         {
 
         }
@@ -318,16 +340,6 @@ namespace EarthInBeatsApp
             this.isDragging = false;
         }
 
-        private void ProgressSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
-        {
-
-        }
-
-        private void ProgressSlider_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
-        {
-
-        }
-
         private void Shuffle_Checked(object sender, RoutedEventArgs e)
         {
 
@@ -357,6 +369,19 @@ namespace EarthInBeatsApp
             {
                 this.ProgressSlider.Value = 0;
                 this.PlayPauseBtn.IsChecked = e;
+
+                if (this.audioPlayer != null)
+                {
+                    var duration = this.audioPlayer.Duration.Ticks;
+                    TimeSpan timeOverall = TimeSpan.FromSeconds(duration);
+                    string overallStr = timeOverall.ToString(@"mm\:ss");
+
+                    this.TrackTimeText.Text = "00:00/" + overallStr;
+                }
+                else
+                {
+                    this.TrackTimeText.Text = "00:00/00:00";
+                }
             });
         }
 

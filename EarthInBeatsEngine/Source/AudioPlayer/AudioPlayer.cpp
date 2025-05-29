@@ -161,11 +161,28 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
     {        
         if (this->playersList.at(this->currentPlayerIndex))
         {
-            winrt::Windows::Foundation::TimeSpan winrtDuration{ this->playersList.at(this->currentPlayerIndex)->GetDuration() };
+            winrt::Windows::Foundation::TimeSpan winrtDuration { this->playersList.at(this->currentPlayerIndex)->GetDuration() };
             return winrtDuration;
         }
 
         return winrt::Windows::Foundation::TimeSpan { 0 };
+    }
+
+    winrt::Windows::Foundation::TimeSpan AudioPlayer::GlobalDuration() const
+    {
+        winrt::Windows::Foundation::TimeSpan winrtGlobalDuration { this->globalDuration };
+        return winrtGlobalDuration;
+    }
+
+    winrt::Windows::Foundation::TimeSpan AudioPlayer::CurrentPosition() const
+    {
+        if (this->playersList.at(this->currentPlayerIndex))
+        {
+            winrt::Windows::Foundation::TimeSpan winrtCurrPos { this->playersList.at(this->currentPlayerIndex)->GetCurrentPosition() };
+            return winrtCurrPos;
+        }
+
+        return winrt::Windows::Foundation::TimeSpan(0);
     }
 
     float AudioPlayer::Volume() const
@@ -182,21 +199,6 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
                 this->playersList.at(i)->SetVolume(volume);
             }
         }
-    }
-
-    int64_t AudioPlayer::GetCurrentPosition() const
-    {
-        if (this->playersList.at(this->currentPlayerIndex))
-        {
-            return this->playersList.at(this->currentPlayerIndex)->GetCurrentPosition();
-        }
-
-        return 0;
-    }
-
-    int64_t AudioPlayer::GetGlobalDuration() const
-    {
-        return this->globalDuration;
     }
 
     bool AudioPlayer::IsPlayingNow() const
