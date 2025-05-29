@@ -41,11 +41,13 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
 
         void ClearPlayList();
 
+        void Repeat(RepeatMode mode);
+
         void EndOfRewindingTrack();
         void EndOfPlayingTrack(int32_t nextIdx);
 
-        winrt::event_token PlayListEnded(const Windows::Foundation::EventHandler<bool>& handler);
-        void PlayListEnded(const winrt::event_token& token);
+        winrt::event_token PlaybackEnded(const Windows::Foundation::EventHandler<bool>& handler);
+        void PlaybackEnded(const winrt::event_token& token);
 
     private:
         winrt::com_ptr<IXAudio2> xAudio2 { nullptr };
@@ -58,7 +60,9 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         std::vector<winrt::hstring> tracksInfo;
         bool isPauseOccurs { false };
         bool isPlayingNow { false };
-        winrt::event<Windows::Foundation::EventHandler<bool>> playListEndedEvent;
+        RepeatMode repeatMode { RepeatMode::None };
+
+        winrt::event<Windows::Foundation::EventHandler<bool>> playbackEndedEvent;
 
     private:
         void FindGlobalDuration();

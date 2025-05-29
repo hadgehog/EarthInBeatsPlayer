@@ -10,6 +10,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.UI.Core;
+using Windows.UI.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -47,6 +48,9 @@ namespace EarthInBeatsApp
             this.VolumeSlider.Maximum = 100.0;
             this.ProgressSlider.Value = 0.0;
             this.ProgressSlider.Maximum = 100.0;
+
+            this.ProgressSlider.AddHandler(PointerPressedEvent, new PointerEventHandler(ProgressSlider_PointerPressed), true);
+            this.ProgressSlider.AddHandler(PointerReleasedEvent, new PointerEventHandler(ProgressSlider_PointerReleased), true);
         }
 
         private async void StartProgress()
@@ -183,7 +187,7 @@ namespace EarthInBeatsApp
                     this.audioPlayer = new AudioPlayer();
                     this.audioPlayer.InitAudioPlayer(this.playList);
 
-                    this.audioPlayer.PlayListEnded += AudioPlayer_PlayListEnded;
+                    this.audioPlayer.PlaybackEnded += AudioPlayer_PlaybackEnded;
                 }
                 else
                 {
@@ -211,7 +215,7 @@ namespace EarthInBeatsApp
                     this.audioPlayer.Stop();
                     this.audioPlayer.ClearPlayList();
 
-                    this.audioPlayer.PlayListEnded -= AudioPlayer_PlayListEnded;
+                    this.audioPlayer.PlaybackEnded -= AudioPlayer_PlaybackEnded;
 
                     this.ProgressSlider.Value = 0.0;
                     this.PlayPauseBtn.IsChecked = false;
@@ -252,16 +256,16 @@ namespace EarthInBeatsApp
 
         private async void Repeat_Click(object sender, RoutedEventArgs e)
         {
-            repeatMode++;
+            this.repeatMode++;
 
-            if (repeatMode > RepeatMode.RepeateAll)
+            if (this.repeatMode > RepeatMode.RepeateAll)
             {
-                repeatMode = RepeatMode.None;
+                this.repeatMode = RepeatMode.None;
             }
 
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                switch (repeatMode)
+                switch (this.repeatMode)
                 {
                     case RepeatMode.RepeateOne:
                         this.Repeat.Icon = new SymbolIcon(Symbol.RepeatOne);
@@ -278,6 +282,11 @@ namespace EarthInBeatsApp
                         break;
                 }
             });
+
+            if (this.audioPlayer != null)
+            {
+                this.audioPlayer.Repeat((EarthInBeatsEngine.Audio.RepeatMode)this.repeatMode);
+            }
         }
 
         private void VolumeSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -290,12 +299,23 @@ namespace EarthInBeatsApp
 
         private void ProgressSlider_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-
+            this.isDragging = true;
         }
 
         private void ProgressSlider_PointerReleased(object sender, PointerRoutedEventArgs e)
         {
+            if (this.audioPlayer != null)
+            {
+                var pointerId = e.Pointer.PointerId;
+                var point = e.GetCurrentPoint(this.ProgressSlider);
+                var position = point.Position.X >= 0 ? point.Position.X : 0.0;
 
+                var newPosition = (position / this.ProgressSlider.ActualWidth) * this.audioPlayer.Duration.Ticks;
+
+                this.audioPlayer.Rewind(newPosition);
+            }
+
+            this.isDragging = false;
         }
 
         private void ProgressSlider_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
@@ -331,14 +351,21 @@ namespace EarthInBeatsApp
             }
         }
 
-
-        private async void AudioPlayer_PlayListEnded(object sender, bool e)
+        private async void AudioPlayer_PlaybackEnded(object sender, bool e/*isPlayingNow*/)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 this.ProgressSlider.Value = 0;
-                this.PlayPauseBtn.IsChecked = false;
+                this.PlayPauseBtn.IsChecked = e;
             });
+        }
+
+        private void PlayPauseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.audioPlayer == null || this.playList == null)
+            {
+                this.PlayPauseBtn.IsChecked = false;
+            }
         }
     }
 }

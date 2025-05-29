@@ -16,6 +16,13 @@ namespace EarthInBeatsEngine.Audio
         Int32 GetPlayListLength();
     }
 
+    enum RepeatMode
+    {
+        None,
+        RepeateOne,
+        RepeateAll
+    };
+
     runtimeclass AudioPlayer
     {
         AudioPlayer();
@@ -41,10 +48,12 @@ namespace EarthInBeatsEngine.Audio
 
         void ClearPlayList();
 
+        void Repeat(RepeatMode mode);
+
         void EndOfRewindingTrack();
         void EndOfPlayingTrack(Int32 nextIdx);
 
         // TODO: rework to simple delegate without parameter
-        event Windows.Foundation.EventHandler<Boolean> PlayListEnded;
+        event Windows.Foundation.EventHandler<Boolean> PlaybackEnded;
     }
 }

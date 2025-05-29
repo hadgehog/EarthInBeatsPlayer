@@ -103,7 +103,8 @@
                 <AppBarToggleButton x:Name="PlayPauseBtn"                                
                                     Icon="Play" 
                                     Checked="PlayPauseBtn_Checked" 
-                                    Unchecked="PlayPauseBtn_Unchecked"/>
+                                    Unchecked="PlayPauseBtn_Unchecked"
+                                    Click="PlayPauseBtn_Click"/>
 
                 <AppBarButton x:Name="Stop" 
                               Icon="Stop" 

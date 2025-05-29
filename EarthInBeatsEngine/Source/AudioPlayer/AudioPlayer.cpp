@@ -8,7 +8,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
 {
     AudioPlayer::AudioPlayer()
         : globalDuration(0), currentPlayerIndex(0), 
-        isPauseOccurs(false), isPlayingNow(false)
+        isPauseOccurs(false), isPlayingNow(false), repeatMode(RepeatMode::None)
     {
         OutputDebugString(L"AudioPlayer created\n");
     }
@@ -26,6 +26,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         this->currentPlayerIndex = 0;
         this->isPauseOccurs = false;
         this->isPlayingNow = false;
+        repeatMode = RepeatMode::None;
 
         this->currentPlayList = playList;
         this->currentPlayList.SortPlaylist();
@@ -45,6 +46,7 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
 
                 this->audioEvents = std::shared_ptr<MFAudioEvents>(tmpEvents);
             }
+            // TODO: rework to get rid of tmp pointers
             //std::dynamic_pointer_cast<MFAudioEvents>(this->audioEvents)->InitEvent(this);
 
             winrt::Windows::Storage::Streams::IRandomAccessStream stream = this->currentPlayList.GetStream(i);
@@ -214,6 +216,11 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         this->tracksInfo.clear();
     }
 
+    void AudioPlayer::Repeat(RepeatMode mode)
+    {
+        this->repeatMode = mode;
+    }
+
     void AudioPlayer::EndOfRewindingTrack()
     {
 
@@ -223,34 +230,61 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
     {
         if (this->playersList.at(this->currentPlayerIndex))
         {
-            this->playersList.at(this->currentPlayerIndex)->Stop();
-            this->currentPlayerIndex++;
+            this->Stop();
 
-            if (this->currentPlayerIndex < (int32_t)this->playersList.size())
+            switch (this->repeatMode)
             {
-                if (this->playersList.at(this->currentPlayerIndex))
+                case RepeatMode::RepeateOne:
                 {
-                    this->playersList.at(this->currentPlayerIndex)->Stop();
-                    this->playersList.at(this->currentPlayerIndex)->Play();
+                    // play again the current track
+                    this->Play();
+                    break;
+                }
+                case RepeatMode::RepeateAll:
+                {
+                    // play till the end, then go to the first track
+                    this->currentPlayerIndex++;
+
+                    if (this->currentPlayerIndex >= (int32_t)this->playersList.size())
+                    {
+                        this->currentPlayerIndex = 0;
+                    }
+
+                    this->Play();
+
+                    break;
+                }
+                case RepeatMode::None:
+                default:
+                {
+                    // go ahead to the next track
+                    this->currentPlayerIndex++;
+
+                    if (this->currentPlayerIndex < (int32_t)this->playersList.size())
+                    {
+                        this->Play();
+                    }
+                    else
+                    {
+                        this->currentPlayerIndex--;
+                    }
+
+                    break;
                 }
             }
-            else
-            {
-                this->currentPlayerIndex--;
-                this->Stop();
-                this->playListEndedEvent(*this, this->isPlayingNow);
-            }
+
+            this->playbackEndedEvent(*this, this->isPlayingNow);
         }
     }
 
-    winrt::event_token AudioPlayer::PlayListEnded(const Windows::Foundation::EventHandler<bool>& handler)
+    winrt::event_token AudioPlayer::PlaybackEnded(const Windows::Foundation::EventHandler<bool>& handler)
     {
-        return this->playListEndedEvent.add(handler);
+        return this->playbackEndedEvent.add(handler);
     }
 
-    void AudioPlayer::PlayListEnded(const winrt::event_token& token)
+    void AudioPlayer::PlaybackEnded(const winrt::event_token& token)
     {
-        this->playListEndedEvent.remove(token);
+        this->playbackEndedEvent.remove(token);
     }
 
     void AudioPlayer::FindGlobalDuration()
