@@ -19,6 +19,8 @@
     <ClCompile Include="Source\AudioPlayer\AudioData\AudioReader\MFAudioReader.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioEvents\MFAudioEvents.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioPlayer.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer.cpp" />
+    <ClCompile Include="Source\Graphics\Rendering\DirectXRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EarthInBeatsEngine.def" />
@@ -42,8 +44,13 @@
     <ClInclude Include="Source\AudioPlayer\AudioEvents\IAudioEvents.h" />
     <ClInclude Include="Source\AudioPlayer\AudioEvents\MFAudioEvents.h" />
     <ClInclude Include="Source\AudioPlayer\AudioPlayer.h" />
+    <ClInclude Include="Source\Graphics\Helpers\Singleton.h" />
+    <ClInclude Include="Source\Graphics\Renderer.h" />
+    <ClInclude Include="Source\Graphics\Rendering\INativeRenderer.h" />
+    <ClInclude Include="Source\Graphics\Rendering\DirectXRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Source\AudioPlayer\AudioPlayer.idl" />
+    <Midl Include="Source\Graphics\Renderer.idl" />
   </ItemGroup>
 </Project>

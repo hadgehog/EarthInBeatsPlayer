@@ -9,13 +9,9 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="WELCOME TO EARTH IN BEATS PLAYER!"
-                   FontSize="24"
-                   FontWeight="Bold"
-                   Foreground="Green"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   TextAlignment="Center" />
+        <SwapChainPanel x:Name="RenderPanel"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"/>
 
         <AppBarButton x:Name="NewPlaylist" 
                       Label="New" 

@@ -1,0 +1,26 @@
+namespace EarthInBeatsEngine.Graphics
+{
+	//enum RenderingMode
+	//{
+	//	Idle,
+	//	Manipulation
+	//};
+
+	runtimeclass Renderer
+	{
+		Renderer();
+
+		void InitRenderer(Windows.UI.Xaml.Controls.SwapChainPanel panel);
+
+		void LoadModel(String path);
+		void LoadModelTexture(String path);
+		void LoadBackgroundTexture(String path);
+
+		void StartRendering();
+		void StopRendering();
+
+		void SetRotation(Single yaw, Single pitch);
+
+		//RenderingMode Manipulation { get; set; };
+	}
+}

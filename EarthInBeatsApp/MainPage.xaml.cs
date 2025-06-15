@@ -1,21 +1,18 @@
 ﻿using EarthInBeatsApp.AudioData;
 using EarthInBeatsEngine.Audio;
-using ProtoBuf.WellKnownTypes;
+using EarthInBeatsEngine.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.UI.Core;
-using Windows.UI.Input;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Input;
 
 namespace EarthInBeatsApp
@@ -41,9 +38,13 @@ namespace EarthInBeatsApp
         private CoreDispatcher dispatcher = CoreApplication.MainView.Dispatcher;
         private bool isDragging = false;
 
+        private Renderer renderer = null;
+
         public MainPage()
         {
             this.InitializeComponent();
+
+            this.Loaded += MainPage_Loaded;
 
             this.VolumeSlider.Value = 70.0;
             this.VolumeSlider.Maximum = 100.0;
@@ -54,6 +55,12 @@ namespace EarthInBeatsApp
 
             this.ProgressSlider.AddHandler(PointerPressedEvent, new PointerEventHandler(ProgressSlider_PointerPressed), true);
             this.ProgressSlider.AddHandler(PointerReleasedEvent, new PointerEventHandler(ProgressSlider_PointerReleased), true);
+        }
+
+        private void MainPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            this.renderer = new Renderer();
+            this.renderer.InitRenderer(this.RenderPanel);
         }
 
         private async void StartProgress()

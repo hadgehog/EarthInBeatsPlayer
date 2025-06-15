@@ -151,6 +151,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Graphics\Rendering\DirectXRenderer.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioPlayer.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioData\AudioReader\MFAudioReader.cpp" />
@@ -160,8 +161,12 @@
     <ClCompile Include="Source\AudioPlayer\AudioEvents\MFAudioEvents.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioHelpers\Auto.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioHelpers\InitMasterVoice.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Graphics\Rendering\DirectXRenderer.h" />
+    <ClInclude Include="Source\Graphics\Rendering\INativeRenderer.h" />
+    <ClInclude Include="Source\Graphics\Helpers\Singleton.h" />
     <ClInclude Include="Source\AudioPlayer\AudioPlayer.h" />
     <ClInclude Include="Source\AudioPlayer\AudioData\AudioReader\IAudioReader.h" />
     <ClInclude Include="Source\AudioPlayer\AudioData\AudioReader\MFAudioReader.h" />
@@ -173,9 +178,11 @@
     <ClInclude Include="Source\AudioPlayer\AudioHelpers\Auto.h" />
     <ClInclude Include="Source\AudioPlayer\AudioHelpers\InitMasterVoice.h" />
     <ClInclude Include="Source\AudioPlayer\AudioHelpers\Rational.h" />
+    <ClInclude Include="Source\Graphics\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Source\AudioPlayer\AudioPlayer.idl" />
+    <Midl Include="Source\Graphics\Renderer.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
