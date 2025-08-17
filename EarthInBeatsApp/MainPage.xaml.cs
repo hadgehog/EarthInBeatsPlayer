@@ -60,7 +60,7 @@ namespace EarthInBeatsApp
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             this.renderer = new Renderer();
-            this.renderer.InitRenderer(this.RenderPanel);
+            this.renderer.InitRenderer(this.RenderPanel, null, null);
         }
 
         private async void StartProgress()

@@ -1,26 +1,34 @@
 namespace EarthInBeatsEngine.Graphics
 {
-	//enum RenderingMode
-	//{
-	//	Idle,
-	//	Manipulation
-	//};
+	enum ModelType
+	{
+		Earth,
+		Satellite,
+		Spaceship
+	};
+
+	interface IModel
+	{
+		String GetModelPath();
+		IVector<String> GetTexturePaths();
+		ModelType GetType();
+	};
 
 	runtimeclass Renderer
 	{
 		Renderer();
 
-		void InitRenderer(Windows.UI.Xaml.Controls.SwapChainPanel panel);
+		void InitRenderer(Windows.UI.Xaml.Controls.SwapChainPanel panel, IVector<IModel> models, IVector<String> textures);
 
-		void LoadModel(String path);
-		void LoadModelTexture(String path);
-		void LoadBackgroundTexture(String path);
+		void LoadModels(IVector<IModel> models);
+		void LoadBackgrounds(IVector<String> textures);
 
 		void StartRendering();
 		void StopRendering();
 
 		void SetRotation(Single yaw, Single pitch);
+		void SetZoom(Single delta);
 
-		//RenderingMode Manipulation { get; set; };
+		Boolean Manipulation { get; set; };
 	}
 }

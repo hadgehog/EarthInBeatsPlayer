@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <PropertyGroup Label="Globals">
@@ -84,6 +84,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgXUseBuiltInApplocalDeps>true</VcpkgXUseBuiltInApplocalDeps>
+    <VcpkgEnableManifest>true</VcpkgEnableManifest>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -151,9 +155,8 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Graphics\Rendering\DirectXRenderer.cpp" />
-    <ClCompile Include="Source\AudioPlayer\AudioPlayer.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
+    <ClCompile Include="Source\AudioPlayer\AudioPlayer.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioData\AudioReader\MFAudioReader.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioData\AudioSample\MFAudioSample.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioEngine\VoiceCallBack.cpp" />
@@ -162,11 +165,13 @@
     <ClCompile Include="Source\AudioPlayer\AudioHelpers\Auto.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioHelpers\InitMasterVoice.cpp" />
     <ClCompile Include="Source\Graphics\Renderer.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer\NativeRenderer.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\Camera.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\Mesh.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\Model.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Graphics\Rendering\DirectXRenderer.h" />
-    <ClInclude Include="Source\Graphics\Rendering\INativeRenderer.h" />
-    <ClInclude Include="Source\Graphics\Helpers\Singleton.h" />
     <ClInclude Include="Source\AudioPlayer\AudioPlayer.h" />
     <ClInclude Include="Source\AudioPlayer\AudioData\AudioReader\IAudioReader.h" />
     <ClInclude Include="Source\AudioPlayer\AudioData\AudioReader\MFAudioReader.h" />
@@ -179,6 +184,16 @@
     <ClInclude Include="Source\AudioPlayer\AudioHelpers\InitMasterVoice.h" />
     <ClInclude Include="Source\AudioPlayer\AudioHelpers\Rational.h" />
     <ClInclude Include="Source\Graphics\Renderer.h" />
+    <ClInclude Include="Source\Graphics\Helpers\d3dx12.h" />
+    <ClInclude Include="Source\Graphics\Helpers\DxHelper.h" />
+    <ClInclude Include="Source\Graphics\Helpers\ISingleton.h" />
+    <ClInclude Include="Source\Graphics\Renderer\NativeRenderer.h" />
+    <ClInclude Include="Source\Graphics\Renderer\UploadContext.h" />
+    <ClInclude Include="Source\Graphics\Scene\Camera.h" />
+    <ClInclude Include="Source\Graphics\Scene\Material.h" />
+    <ClInclude Include="Source\Graphics\Scene\Mesh.h" />
+    <ClInclude Include="Source\Graphics\Scene\Model.h" />
+    <ClInclude Include="Source\Graphics\Scene\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Source\AudioPlayer\AudioPlayer.idl" />

@@ -29,10 +29,19 @@ namespace winrt::EarthInBeatsEngine::Audio::implementation
         repeatMode = RepeatMode::None;
 
         this->currentPlayList = playList;
+
+        if (this->currentPlayList == nullptr)
+        {
+            assert("Play list is not created!");
+            return;
+        }
+
         this->currentPlayList.SortPlaylist();
         this->FindGlobalDuration();
 
-        for (int32_t i = 0; i < this->currentPlayList.GetPlayListLength(); i++)
+        size_t playlistLength = this->currentPlayList.GetPlayListLength();
+
+        for (size_t i = 0; i < playlistLength; i++)
         {
             auto reader = std::make_shared<MFAudioReader>();
             auto player = std::make_shared<XAudio2Player>();        

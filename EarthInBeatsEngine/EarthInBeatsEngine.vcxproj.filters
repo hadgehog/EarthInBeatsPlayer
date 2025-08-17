@@ -20,7 +20,11 @@
     <ClCompile Include="Source\AudioPlayer\AudioEvents\MFAudioEvents.cpp" />
     <ClCompile Include="Source\AudioPlayer\AudioPlayer.cpp" />
     <ClCompile Include="Source\Graphics\Renderer.cpp" />
-    <ClCompile Include="Source\Graphics\Rendering\DirectXRenderer.cpp" />
+    <ClCompile Include="Source\Graphics\Renderer\NativeRenderer.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\Camera.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\Mesh.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\Model.cpp" />
+    <ClCompile Include="Source\Graphics\Scene\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EarthInBeatsEngine.def" />
@@ -44,10 +48,17 @@
     <ClInclude Include="Source\AudioPlayer\AudioEvents\IAudioEvents.h" />
     <ClInclude Include="Source\AudioPlayer\AudioEvents\MFAudioEvents.h" />
     <ClInclude Include="Source\AudioPlayer\AudioPlayer.h" />
-    <ClInclude Include="Source\Graphics\Helpers\Singleton.h" />
     <ClInclude Include="Source\Graphics\Renderer.h" />
-    <ClInclude Include="Source\Graphics\Rendering\INativeRenderer.h" />
-    <ClInclude Include="Source\Graphics\Rendering\DirectXRenderer.h" />
+    <ClInclude Include="Source\Graphics\Helpers\d3dx12.h" />
+    <ClInclude Include="Source\Graphics\Helpers\DxHelper.h" />
+    <ClInclude Include="Source\Graphics\Helpers\ISingleton.h" />
+    <ClInclude Include="Source\Graphics\Renderer\NativeRenderer.h" />
+    <ClInclude Include="Source\Graphics\Scene\Camera.h" />
+    <ClInclude Include="Source\Graphics\Scene\Mesh.h" />
+    <ClInclude Include="Source\Graphics\Scene\Model.h" />
+    <ClInclude Include="Source\Graphics\Renderer\UploadContext.h" />
+    <ClInclude Include="Source\Graphics\Scene\Material.h" />
+    <ClInclude Include="Source\Graphics\Scene\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Source\AudioPlayer\AudioPlayer.idl" />

@@ -396,3 +396,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# vcpkg installed packages
+vcpkg_installed/
+
+# vcpkg tool (if present in repo)
+vcpkg-tool/
