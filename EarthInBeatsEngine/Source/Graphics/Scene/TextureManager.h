@@ -5,8 +5,8 @@
 #include <wrl.h>
 #include <d3d12.h>
 
-#include "../Helpers/DxHelper.h"
 #include "../Renderer/UploadContext.h"
+
 #include "Material.h"
 
 class TextureManager
@@ -16,8 +16,7 @@ public:
     ~TextureManager() = default;
 
     void Initialize(ID3D12Device* device, ID3D12DescriptorHeap* shaderVisibleSrvHeap, UINT descriptorSize);
-    TextureHandle LoadTexture(const UploadContext& up, const std::string& path);
-    TextureHandle LoadBackgroundTexture(const UploadContext& up, const std::string& path);
+    TextureHandle LoadTexture(const UploadContext& ctx, const std::string& path);
 
 private:
     TextureHandle LoadInternal(const UploadContext& up, const std::string& path);
