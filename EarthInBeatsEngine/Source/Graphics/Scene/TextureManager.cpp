@@ -37,11 +37,15 @@ TextureHandle TextureManager::LoadInternal(const UploadContext& ctx, const std::
 
     HRESULT hr = LoadFromWICFile(wpath.c_str(), DirectX::WIC_FLAGS::WIC_FLAGS_FORCE_RGB, nullptr, img);
 
-    if (FAILED(hr)) 
+    if (FAILED(hr))
+    {
         hr = LoadFromDDSFile(wpath.c_str(), DirectX::DDS_FLAGS::DDS_FLAGS_NONE, nullptr, img);
+    }
 
-    if (FAILED(hr)) 
+    if (FAILED(hr))
+    {
         return handle;
+    }
 
     const DirectX::Image* simg = img.GetImage(0, 0, 0);
 

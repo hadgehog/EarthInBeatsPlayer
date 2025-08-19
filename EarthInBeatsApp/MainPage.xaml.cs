@@ -1,4 +1,5 @@
 ﻿using EarthInBeatsApp.AudioData;
+using EarthInBeatsApp.GraphicsData;
 using EarthInBeatsEngine.Audio;
 using EarthInBeatsEngine.Graphics;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.Graphics.Display;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
@@ -14,6 +16,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 
 namespace EarthInBeatsApp
 {
@@ -57,10 +60,28 @@ namespace EarthInBeatsApp
             this.ProgressSlider.AddHandler(PointerReleasedEvent, new PointerEventHandler(ProgressSlider_PointerReleased), true);
         }
 
+        private void PanelPixelSize(out uint w, out uint h)
+        {
+            var di = DisplayInformation.GetForCurrentView();
+            var dpi = di.LogicalDpi; // 96 == 100%
+
+            w = (uint)Math.Round(this.RenderPanel.ActualWidth * dpi / 96.0);
+            h = (uint)Math.Round(this.RenderPanel.ActualHeight * dpi / 96.0);
+        }
+
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+            this.PanelPixelSize(out var width, out var height);
+
+            string basePath = Path.Combine("C:", "Users", "vladi", "OneDrive", "My Projects", "Eart_In_Beats - new", "EarthInBeatsPlayer", "EarthInBeatsApp");
+            string model = Path.Combine(basePath, "Assets", "Models", "Earth_model.obj");
+            string overrideTex = "";
+            string background = Path.Combine(basePath, "Assets", "Textures", "space_background.dds");
+
             this.renderer = new Renderer();
-            this.renderer.InitRenderer(this.RenderPanel, null, null);
+            this.renderer.Initialize(this.RenderPanel, width, height, model, overrideTex, background);
+            
+            CompositionTarget.Rendering += (_, __) => this.renderer.Render();
         }
 
         private async void StartProgress()

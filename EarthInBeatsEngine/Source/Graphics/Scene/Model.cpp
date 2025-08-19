@@ -50,8 +50,10 @@ bool Model::Initialize(ID3D12Device* device, const std::string& path)
         aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices |
         aiProcess_ConvertToLeftHanded);
 
-    if (!scene || !scene->mRootNode) 
+    if (!scene || !scene->mRootNode)
+    {
         return false;
+    }
 
     // Materials
     m_materials.clear();
@@ -173,6 +175,7 @@ void Model::SetScale(float scale)
 {
     if (scale < 0.01f)
         scale = 0.01f;
+
     if (scale > 100.0f)
         scale = 100.0f;
 

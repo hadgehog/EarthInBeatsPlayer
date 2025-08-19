@@ -64,4 +64,10 @@
     <Midl Include="Source\AudioPlayer\AudioPlayer.idl" />
     <Midl Include="Source\Graphics\Renderer.idl" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Source\Graphics\Shaders\basic_vs.hlsl" />
+    <FxCompile Include="Source\Graphics\Shaders\background_vs.hlsl" />
+    <FxCompile Include="Source\Graphics\Shaders\basic_ps.hlsl" />
+    <FxCompile Include="Source\Graphics\Shaders\background_ps.hlsl" />
+  </ItemGroup>
 </Project>

@@ -7,24 +7,38 @@ namespace EarthInBeatsEngine.Graphics
 		Spaceship
 	};
 
-	interface IModel
-	{
-		String GetModelPath();
-		IVector<String> GetTexturePaths();
-		ModelType GetType();
-	};
+	//interface IModel
+	//{
+	//	String GetModelPath();
+	//	String GetModelName();
+	//	ModelType GetModelType();
+	//	IVector<String> GetTexturePaths();
+	//};
 
 	runtimeclass Renderer
 	{
 		Renderer();
 
-		void InitRenderer(Windows.UI.Xaml.Controls.SwapChainPanel panel, IVector<IModel> models, IVector<String> textures);
+		//void Initialize(
+		//	Windows.UI.Xaml.Controls.SwapChainPanel panel,
+		//	IVector<IModel> models, 
+		//	IVector<String> bgTextures,
+		//	Int32 width, Int32 height);
 
-		void LoadModels(IVector<IModel> models);
-		void LoadBackgrounds(IVector<String> textures);
+		void Initialize(
+			Windows.UI.Xaml.Controls.SwapChainPanel panel,
+			UInt32 width, UInt32 height,
+			String modelPath,
+			String backgroundTexturePath,
+			String modelTextureOverridePath);
 
-		void StartRendering();
-		void StopRendering();
+		void Resize(UInt32 width, UInt32 height);
+
+		void Render();
+		void Shutdown();
+
+		//void LoadModels(IVector<IModel> models);
+		//void LoadBackgrounds(IVector<String> textures);
 
 		void SetRotation(Single yaw, Single pitch);
 		void SetZoom(Single delta);

@@ -47,7 +47,8 @@ DirectX::XMMATRIX Camera::View() const
 	const float cp = cosf(m_pitch);
 	const float sp = sinf(m_pitch);
 
-	DirectX::XMFLOAT3 eye {
+	DirectX::XMFLOAT3 eye 
+	{
 		m_target.x + m_dist * cp * sy,
 		m_target.y + m_dist * sp,
 		m_target.z + m_dist * cp * cy

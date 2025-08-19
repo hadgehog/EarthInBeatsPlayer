@@ -121,6 +121,7 @@
     </Compile>
     <Compile Include="AudioData\PlayList.cs" />
     <Compile Include="AudioData\Track.cs" />
+    <Compile Include="GraphicsData\Model.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
