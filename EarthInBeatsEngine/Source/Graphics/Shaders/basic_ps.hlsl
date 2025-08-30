@@ -1,4 +1,4 @@
-struct PSInput
+struct VSOutput
 {
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
@@ -8,7 +8,7 @@ struct PSInput
 Texture2D gBaseColor : register(t0);
 SamplerState gSample : register(s0);
 
-float4 main(PSInput pin) : SV_Target
+float4 main(VSOutput pin) : SV_Target
 {
     float3 lightDir = normalize(float3(0.3f, 0.6f, 0.5f));
     float3 n = normalize(pin.norm);

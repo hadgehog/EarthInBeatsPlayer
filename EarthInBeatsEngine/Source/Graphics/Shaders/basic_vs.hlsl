@@ -15,16 +15,16 @@ struct VSInput
     float2 uv : TEXCOORD0;
 };
 
-struct PSInput
+struct VSOutput
 {
     float4 pos : SV_POSITION;
     float3 norm : NORMAL;
     float2 uv : TEXCOORD0;
 };
 
-PSInput main(VSInput vin)
+VSOutput main(VSInput vin)
 {
-    PSInput v;
+    VSOutput v;
     float4 wpos = mul(float4(vin.pos, 1.0f), model);
     v.pos = mul(wpos, viewProj);
     v.norm = mul(float4(vin.norm, 0.0f), model).xyz;
