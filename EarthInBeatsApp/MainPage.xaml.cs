@@ -73,10 +73,10 @@ namespace EarthInBeatsApp
         {
             this.PanelPixelSize(out var width, out var height);
 
-            string basePath = Path.Combine("C:", "Users", "vladi", "OneDrive", "My Projects", "Eart_In_Beats - new", "EarthInBeatsPlayer", "EarthInBeatsApp");
-            string model = Path.Combine(basePath, "Assets", "Models", "Earth_model.obj");
+            string basePath = Path.Combine("C:", "EarthInBeatsPlayer", "EarthInBeatsApp", "Assets");
+            string model = Path.Combine(basePath, "Models", "Earth_model.obj");
             string overrideTex = "";
-            string background = Path.Combine(basePath, "Assets", "Textures", "space_background.dds");
+            string background = Path.Combine(basePath, "Textures", "space_background.dds");
 
             this.renderer = new Renderer();
             this.renderer.Initialize(this.RenderPanel, width, height, model, overrideTex, background);

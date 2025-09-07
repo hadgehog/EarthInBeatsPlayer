@@ -294,23 +294,10 @@ void NativeRenderer::CreatePipelineStates()
     flags |= D3DCOMPILE_DEBUG;
 #endif
 
-    Microsoft::WRL::ComPtr<ID3DBlob> errs;
-    Microsoft::WRL::ComPtr<ID3DBlob> vsModel;
-    Microsoft::WRL::ComPtr<ID3DBlob> psModel;
-    std::wstring shadersPath = L"C:/Users/vladi/OneDrive/My Projects/Eart_In_Beats - new/EarthInBeatsPlayer/EarthInBeatsEngine/Source/Graphics/Shaders/";
-
-    DX::ThrowIfFailed(D3DCompileFromFile((shadersPath + L"basic_vs.hlsl").c_str(), nullptr, nullptr, "main", "vs_5_0", flags, 0, &vsModel, &errs),
-        "An error occurred while loading the basic vertex shader!");
-    DX::ThrowIfFailed(D3DCompileFromFile((shadersPath + L"basic_ps.hlsl").c_str(), nullptr, nullptr, "main", "ps_5_0", flags, 0, &psModel, &errs),
-        "An error occurred while loading the basic pixel shader!");
-
-    Microsoft::WRL::ComPtr<ID3DBlob> vsBg;
-    Microsoft::WRL::ComPtr<ID3DBlob> psBg;
-
-    DX::ThrowIfFailed(D3DCompileFromFile((shadersPath + L"background_vs.hlsl").c_str(), nullptr, nullptr, "main", "vs_5_0", flags, 0, &vsBg, &errs),
-        "An error occurred while loading the background vertex shader!");
-    DX::ThrowIfFailed(D3DCompileFromFile((shadersPath + L"background_ps.hlsl").c_str(), nullptr, nullptr, "main", "ps_5_0", flags, 0, &psBg, &errs),
-        "An error occurred while loading the background pixel shader!");
+    auto vsModelData = DX::LoadPackageFile(L"EarthInBeatsEngine\\basic_vs.cso");
+    auto psModelData = DX::LoadPackageFile(L"EarthInBeatsEngine\\basic_ps.cso");
+    auto vsBackgroundData = DX::LoadPackageFile(L"EarthInBeatsEngine\\background_vs.cso");
+    auto psBackgroundData = DX::LoadPackageFile(L"EarthInBeatsEngine\\background_ps.cso");
 
     CD3DX12_DESCRIPTOR_RANGE1 srvRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
     CD3DX12_ROOT_PARAMETER1 params[3];
@@ -322,7 +309,9 @@ void NativeRenderer::CreatePipelineStates()
     D3D12_STATIC_SAMPLER_DESC samp {};
 
     samp.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-    samp.AddressU = samp.AddressV = samp.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+    samp.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+    samp.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+    samp.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
     samp.ShaderRegister = 0;
     samp.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
@@ -345,26 +334,29 @@ void NativeRenderer::CreatePipelineStates()
     };
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc {};
-
+    // base PSO desc
     psoDesc.pRootSignature = m_rootSig.Get();
-    psoDesc.VS = { vsModel->GetBufferPointer(), vsModel->GetBufferSize() };
-    psoDesc.PS = { psModel->GetBufferPointer(), psModel->GetBufferSize() };
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     psoDesc.SampleMask = UINT_MAX;
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     psoDesc.DepthStencilState.DepthEnable = FALSE;
     psoDesc.DepthStencilState.StencilEnable = FALSE;
-    psoDesc.InputLayout = { layout, _countof(layout) };
     psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    psoDesc.NumRenderTargets = 1; psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+    psoDesc.NumRenderTargets = 1;
     psoDesc.SampleDesc.Count = 1;
+
+    // model PSO desc
+    psoDesc.VS = { vsModelData.data(), vsModelData.size() };
+    psoDesc.PS = { psModelData.data(), psModelData.size() };
+    psoDesc.InputLayout = { layout, _countof(layout) };
 
     DX::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pso)));
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC bgDesc = psoDesc;
-
-    bgDesc.VS = { vsBg->GetBufferPointer(), vsBg->GetBufferSize() };
-    bgDesc.PS = { psBg->GetBufferPointer(), psBg->GetBufferSize() };
+    // background PSO desc
+    bgDesc.VS = { vsBackgroundData.data(), vsBackgroundData.size() };
+    bgDesc.PS = { psBackgroundData.data(), psBackgroundData.size() };
     bgDesc.InputLayout = { nullptr, 0 };
 
     DX::ThrowIfFailed(m_device->CreateGraphicsPipelineState(&bgDesc, IID_PPV_ARGS(&m_bgPso)));

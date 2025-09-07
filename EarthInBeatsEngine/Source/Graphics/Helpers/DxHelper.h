@@ -13,6 +13,15 @@
 
 namespace DX
 {
+	// Prints message in the terminal
+	inline void DebugOutput(const std::string& info)
+	{
+#ifdef _DEBUG
+		//printf("\n%s", info.c_str());
+		std::wcout << info.c_str() << std::endl;
+#endif
+	}
+
 	// Function for validation HRESULT resuts.
 	inline void ThrowIfFailed(HRESULT hr, Platform::String^ msg = "")
 	{
@@ -61,5 +70,47 @@ namespace DX
 		WideCharToMultiByte(CP_UTF8, 0, wStr.c_str(), (int)wStr.size(), str.data(), size, nullptr, nullptr);
 
 		return str;
+	}
+
+	// Loads packge file (for example .cso as bytes array
+	inline std::vector<uint8_t> LoadPackageFile(const std::wstring& path) 
+	{
+		std::vector<uint8_t> fileData;
+		auto tmpPath = Windows::ApplicationModel::Package::Current->InstalledLocation->Path;
+		std::wstring installedPath(tmpPath->Data(), tmpPath->Length());
+		std::wstring fullPath = installedPath + L"\\" + path;
+
+		auto file = CreateFile2(fullPath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_EXISTING, nullptr);
+
+		if (file != INVALID_HANDLE_VALUE) 
+		{
+			DWORD readed;
+			LARGE_INTEGER pos;
+			LARGE_INTEGER newPos;
+			LARGE_INTEGER fileSize;
+
+			pos.QuadPart = 0;
+			newPos.QuadPart = 0;
+
+			SetFilePointerEx(file, pos, &newPos, FILE_END);
+			fileSize = newPos;
+			SetFilePointerEx(file, pos, &newPos, FILE_BEGIN);
+
+			fileData.resize(static_cast<size_t>(fileSize.QuadPart));
+
+			if (!ReadFile(file, fileData.data(), fileData.size(), &readed, nullptr))
+			{
+				CloseHandle(file);
+
+				DWORD dwError = GetLastError();
+				ThrowIfFailed(HRESULT_FROM_WIN32(dwError), "Error reading file!");
+
+				return fileData;
+			}
+
+			CloseHandle(file);
+		}
+
+		return fileData;
 	}
 }
