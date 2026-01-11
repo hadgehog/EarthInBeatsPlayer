@@ -41,14 +41,17 @@ static void ExtractMesh(const aiMesh* mesh, std::vector<Vertex>& vertices, std::
     }
 }
 
-bool Model::Initialize(ID3D12Device* device, const std::string& path)
+bool Model::Initialize(ID3D12Device* device, const std::vector<uint8_t>& modelData)
 {
     Assimp::Importer importer;
+    unsigned flags =
+        aiProcess_Triangulate |
+        aiProcess_JoinIdenticalVertices |
+        aiProcess_GenNormals |
+        aiProcess_ImproveCacheLocality |
+        aiProcess_ConvertToLeftHanded;  // ???
 
-    const aiScene* scene = importer.ReadFile(path,
-        aiProcess_Triangulate | aiProcess_GenNormals |
-        aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices |
-        aiProcess_ConvertToLeftHanded);
+    const aiScene* scene = importer.ReadFileFromMemory(modelData.data(), modelData.size(), flags);
 
     if (!scene || !scene->mRootNode)
     {
@@ -62,11 +65,14 @@ bool Model::Initialize(ID3D12Device* device, const std::string& path)
     for (uint32_t i = 0; i < scene->mNumMaterials; ++i)
     {
         Material mat {};
-        mat.m_materialName = scene->mMaterials[i]->GetName().C_Str();
+        aiMaterial* material = scene->mMaterials[i];
+        std::vector<uint8_t> texData;
+        aiString matName;
 
-        aiString texPath;
-        if (scene->mMaterials[i]->GetTexture(aiTextureType_DIFFUSE, 0, &texPath) == aiReturn_SUCCESS)
-            mat.m_baseColorPath = texPath.C_Str();
+        if(material->Get(AI_MATKEY_NAME, matName) == AI_SUCCESS)
+            mat.m_materialName = matName.C_Str();
+
+        // TODO: load material color and textures
 
         m_materials[i] = std::move(mat);
     }
@@ -120,21 +126,21 @@ void Model::ResolveMaterials(TextureManager& texMgr, const UploadContext& up)
 {
     for (auto& material : m_materials)
     {
-        if (!material.m_baseColorPath.empty())
+        if (!material.m_baseColor.empty())
         {
-            material.m_baseColorTexture = texMgr.LoadTexture(up, material.m_baseColorPath);
+            material.m_baseColorTexture = texMgr.LoadTexture(up, material.m_baseColor);
         }
     }
 }
 
-void Model::OverrideAllBaseColor(TextureManager& texMgr, const UploadContext& up, const std::string& path)
+void Model::OverrideAllBaseColor(TextureManager& texMgr, const UploadContext& up, const std::vector<uint8_t>& data)
 {
-    if (path.empty()) 
+    if (data.empty())
         return;
 
     for (auto& material : m_materials)
     {
-        material.m_baseColorTexture = texMgr.LoadTexture(up, path);
+        material.m_baseColorTexture = texMgr.LoadTexture(up, data);
     }
 }
 

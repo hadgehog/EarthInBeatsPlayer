@@ -10,36 +10,39 @@ void TextureManager::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* shad
 	m_srvHeap = shaderVisibleSrvHeap;
 	m_descriptorSize = descriptorSize;
 	m_nextSlot = 0;
-	m_cache.clear();
+	//m_cache.clear();
 }
 
-TextureHandle TextureManager::LoadTexture(const UploadContext& ctx, const std::string& path)
+TextureHandle TextureManager::LoadTexture(const UploadContext& ctx, const std::vector<uint8_t>& textureData)
 {
-	auto texIt = m_cache.find(path);
+	//auto texIt = m_cache.find(textureData);
 
-	if (texIt != m_cache.end())
-		return texIt->second;
+	//if (texIt != m_cache.end())
+	//	return texIt->second;
 
-	TextureHandle handle = this->LoadInternal(ctx, path);
+	TextureHandle handle = this->LoadInternal(ctx, textureData);
 
-	if (handle.valid()) 
-		m_cache[path] = handle;
+	//if (handle.valid()) 
+	//	m_cache[textureData] = handle;
 
 	return handle;
 }
 
-TextureHandle TextureManager::LoadInternal(const UploadContext& ctx, const std::string& path)
+TextureHandle TextureManager::LoadInternal(const UploadContext& ctx, const std::vector<uint8_t>& textureData)
 {
     TextureHandle handle {};
-
     DirectX::ScratchImage img;
-    std::wstring wpath(path.begin(), path.end());
 
-    HRESULT hr = LoadFromWICFile(wpath.c_str(), DirectX::WIC_FLAGS::WIC_FLAGS_FORCE_RGB, nullptr, img);
+    HRESULT hr = LoadFromDDSMemory(textureData.data(), textureData.size(), DirectX::DDS_FLAGS::DDS_FLAGS_FORCE_RGB, nullptr, img);
 
     if (FAILED(hr))
     {
-        hr = LoadFromDDSFile(wpath.c_str(), DirectX::DDS_FLAGS::DDS_FLAGS_NONE, nullptr, img);
+        hr = LoadFromTGAMemory(textureData.data(), textureData.size(), DirectX::TGA_FLAGS::TGA_FLAGS_NONE, nullptr, img);
+    }
+
+    if (FAILED(hr))
+    {
+        hr = LoadFromWICMemory(textureData.data(), textureData.size(), DirectX::WIC_FLAGS::WIC_FLAGS_FORCE_RGB, nullptr, img);
     }
 
     if (FAILED(hr))

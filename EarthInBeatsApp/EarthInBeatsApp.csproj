@@ -99,6 +99,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -133,8 +134,12 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Textures\Earth_texture.dds" />
-    <Content Include="Assets\Textures\space_background.dds" />
+    <Content Include="Assets\Textures\Earth_texture.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Textures\space_background.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -163,13 +168,20 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="EarthInBeatsEngine, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\x64\Debug\EarthInBeatsEngine\EarthInBeatsEngine.winmd</HintPath>
-    </Reference>
+    <Content Include="Assets\Models\Earth.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Models\Earth_model.obj" />
+    <ProjectReference Include="..\EarthInBeatsEngine\EarthInBeatsEngine.vcxproj">
+      <Project>{196025c9-7cd6-4634-a61b-848b16e3bb98}</Project>
+      <Name>EarthInBeatsEngine</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\Models\Earth.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -7,7 +7,7 @@ namespace EarthInBeatsApp.AudioData
         public int Position { get; set; }
         public string Name { get; set; }
 
-        public Track() 
+        public Track()
         {
             this.Position = 0;
             this.Name = string.Empty;

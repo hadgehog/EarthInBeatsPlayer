@@ -19,6 +19,6 @@ struct TextureHandle
 struct Material 
 {
     std::string m_materialName;
-    std::string m_baseColorPath;        // asset path
+    std::vector<uint8_t> m_baseColor;   // asset data
     TextureHandle m_baseColorTexture;   // resolved handle
 };

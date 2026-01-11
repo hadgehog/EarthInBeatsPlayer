@@ -16,10 +16,10 @@ public:
     ~TextureManager() = default;
 
     void Initialize(ID3D12Device* device, ID3D12DescriptorHeap* shaderVisibleSrvHeap, UINT descriptorSize);
-    TextureHandle LoadTexture(const UploadContext& ctx, const std::string& path);
+    TextureHandle LoadTexture(const UploadContext& ctx, const std::vector<uint8_t>& textureData);
 
 private:
-    TextureHandle LoadInternal(const UploadContext& up, const std::string& path);
+    TextureHandle LoadInternal(const UploadContext& up, const std::vector<uint8_t>& textureData);
     D3D12_CPU_DESCRIPTOR_HANDLE CpuAt(UINT slot) const;
     D3D12_GPU_DESCRIPTOR_HANDLE GpuAt(UINT slot) const;
 
@@ -27,6 +27,6 @@ private:
     ID3D12DescriptorHeap* m_srvHeap = nullptr; // shader-visible
     UINT m_descriptorSize = 0;
     UINT m_nextSlot = 0;
-    std::unordered_map<std::string, TextureHandle> m_cache;
+    //std::unordered_map<std::vector<uint8_t>, TextureHandle> m_cache;  // TODO improve (vector as a key is bad)
 };
 

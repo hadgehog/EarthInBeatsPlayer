@@ -19,15 +19,17 @@ namespace EarthInBeatsEngine.Graphics
 	{
 		Renderer();
 
+		// TODO
 		//void Initialize(
 		//	Windows.UI.Xaml.Controls.SwapChainPanel panel,
 		//	IVector<IModel> models, 
 		//	IVector<String> bgTextures,
 		//	Int32 width, Int32 height);
 
-		void Initialize(
+		Windows.Foundation.IAsyncAction Initialize(
 			Windows.UI.Xaml.Controls.SwapChainPanel panel,
-			UInt32 width, UInt32 height,
+			UInt32 width, 
+			UInt32 height,
 			String modelPath,
 			String backgroundTexturePath,
 			String modelTextureOverridePath);

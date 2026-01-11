@@ -29,6 +29,7 @@
   <ItemGroup>
     <None Include="EarthInBeatsEngine.def" />
     <None Include="packages.config" />
+    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\Assimp64.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />

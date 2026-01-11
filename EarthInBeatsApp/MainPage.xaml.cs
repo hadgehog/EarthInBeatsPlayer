@@ -69,18 +69,18 @@ namespace EarthInBeatsApp
             h = (uint)Math.Round(this.RenderPanel.ActualHeight * dpi / 96.0);
         }
 
-        private void MainPage_Loaded(object sender, RoutedEventArgs e)
+        private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             this.PanelPixelSize(out var width, out var height);
 
-            string basePath = Path.Combine("C:", "EarthInBeatsPlayer", "EarthInBeatsApp", "Assets");
-            string model = Path.Combine(basePath, "Models", "Earth_model.obj");
-            string overrideTex = "";
+            string basePath = Path.Combine("C:", "EarthInBeatsPlayer", "EarthInBeatsApp", "bin", "x64", "Debug", "AppX", "Assets");
+            string model = Path.Combine(basePath, "Models", "Earth.obj");
             string background = Path.Combine(basePath, "Textures", "space_background.dds");
+            string earthTex = Path.Combine(basePath, "Textures", "Earth_texture.dds");
 
             this.renderer = new Renderer();
-            this.renderer.Initialize(this.RenderPanel, width, height, model, overrideTex, background);
-            
+            await this.renderer.Initialize(this.RenderPanel, width, height, model, background, earthTex);
+
             CompositionTarget.Rendering += (_, __) => this.renderer.Render();
         }
 

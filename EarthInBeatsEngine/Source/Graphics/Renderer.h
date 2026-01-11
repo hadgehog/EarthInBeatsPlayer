@@ -1,25 +1,29 @@
 #pragma once
 
 #include "Graphics.Renderer.g.h"
+#include <winrt/Windows.UI.Xaml.Controls.h>
 
-#include "Renderer/NativeRenderer.h"
+class NativeRenderer;
 
 namespace winrt::EarthInBeatsEngine::Graphics::implementation
 {
 	struct Renderer : RendererT<Renderer>
 	{
 	public:
-		Renderer();
+		Renderer() = default;
 		~Renderer() = default;
 
-		//void Initialize(const winrt::Windows::UI::Xaml::Controls::SwapChainPanel& panel,
+		// TODO : implement
+		//void Initialize(
+		//  const Windows::UI::Xaml::Controls::SwapChainPanel& panel,
 		//	const Windows::Foundation::Collections::IVector<IModel>& models, 
 		//	const Windows::Foundation::Collections::IVector<hstring>& bgTextures,
 		//	int32_t width, int32_t height);
 
-		void Initialize(
-			const winrt::Windows::UI::Xaml::Controls::SwapChainPanel& panel,
-			uint32_t width, uint32_t height,
+		Windows::Foundation::IAsyncAction Initialize(
+			const Windows::UI::Xaml::Controls::SwapChainPanel& panel,
+			uint32_t width, 
+			uint32_t height,
 			const hstring& modelPath,
 			const hstring& backgroundTexturePath,
 			const hstring& modelTextureOverridePath);
@@ -40,6 +44,10 @@ namespace winrt::EarthInBeatsEngine::Graphics::implementation
 		// TODO: implement
 		bool Manipulation() const;
 		void Manipulation(bool isManipulating);
+
+	private:
+		// TODO: return data except of out
+		Windows::Foundation::IAsyncAction LoadAssetFromAppxPath(const hstring& path, std::vector<uint8_t>& outData);
 
 	private:
 		std::unique_ptr<NativeRenderer> m_renderer { nullptr };

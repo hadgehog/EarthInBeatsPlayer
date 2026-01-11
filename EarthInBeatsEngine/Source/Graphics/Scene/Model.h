@@ -11,10 +11,10 @@ public:
     ~Model() = default;
 
     // Load model from file
-    bool Initialize(ID3D12Device* device, const std::string& path);
+    bool Initialize(ID3D12Device* device, const std::vector<uint8_t>& modelData);
 
     void ResolveMaterials(TextureManager& texMgr, const UploadContext& ctx);
-    void OverrideAllBaseColor(TextureManager& texMgr, const UploadContext& ctx, const std::string& path);
+    void OverrideAllBaseColor(TextureManager& texMgr, const UploadContext& ctx, const std::vector<uint8_t>& data);
 
     const std::vector<Mesh>& Meshes() const;
     const Material& MaterialAt(uint32_t idx) const;
