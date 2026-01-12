@@ -33,6 +33,8 @@ public:
 
     void RenderFrame();
 
+    void Resize(uint32_t width, uint32_t height);
+
 private:
     void InitD3D12();
     void CreateSwapChainForPanel();

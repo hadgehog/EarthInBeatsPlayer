@@ -24,10 +24,14 @@ namespace winrt::EarthInBeatsEngine::Graphics::implementation
 		std::vector<uint8_t> backgroundTex;
 		std::vector<uint8_t> modelTexOverride;
 
+		// fast fix for the crash
+		hstring modelPathLocal(modelPath.data(), modelPath.size());
+		hstring bgTexturePathLocal(backgroundTexturePath.data(), backgroundTexturePath.size());
+
 		com_ptr<ISwapChainPanelNative> panelNative = panel.as<ISwapChainPanelNative>();
 
-		// co_await this->LoadAssetFromAppxPath(modelPath, mainModel);
-		co_await this->LoadAssetFromAppxPath(backgroundTexturePath, backgroundTex);
+		co_await this->LoadAssetFromAppxPath(modelPathLocal, mainModel);
+		co_await this->LoadAssetFromAppxPath(bgTexturePathLocal, backgroundTex);
 		// co_await this->LoadAssetFromAppxPath(modelTextureOverridePath, modelTexOverride);
 
 		m_renderer = std::make_unique<NativeRenderer>();
@@ -43,7 +47,7 @@ namespace winrt::EarthInBeatsEngine::Graphics::implementation
 
 	void Renderer::Resize(uint32_t width, uint32_t height)
 	{
-		// m_renderer->Resize(width, height);
+		m_renderer->Resize(width, height);
 	}
 
 	void Renderer::Render()

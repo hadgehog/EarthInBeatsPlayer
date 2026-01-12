@@ -48,6 +48,7 @@ namespace EarthInBeatsApp
             this.InitializeComponent();
 
             this.Loaded += MainPage_Loaded;
+            this.SizeChanged += MainPage_SizeChanged;
 
             this.VolumeSlider.Value = 70.0;
             this.VolumeSlider.Maximum = 100.0;
@@ -82,6 +83,14 @@ namespace EarthInBeatsApp
             await this.renderer.Initialize(this.RenderPanel, width, height, model, background, earthTex);
 
             CompositionTarget.Rendering += (_, __) => this.renderer.Render();
+        }
+
+        private void MainPage_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (this.renderer != null)
+            {
+                this.renderer.Resize((uint)this.RenderPanel.ActualWidth, (uint)this.RenderPanel.ActualHeight);
+            }
         }
 
         private async void StartProgress()

@@ -71,10 +71,10 @@ void NativeRenderer::Initialize(
 	this->InitD3D12();
 
 	this->CreateBackgroundPipeline();
-	// this->CreateModelPipeline();
+	this->CreateModelPipeline();
 
 	this->LoadBackgroundTexture(bgTex);
-	// this->LoadModelAssimp(model);
+	this->LoadModelAssimp(model);
 
 	struct alignas(256) CB
 	{
@@ -140,7 +140,7 @@ void NativeRenderer::RenderFrame()
     }
 
     // ---------- Draw model ----------
-    /*if (m_vbDefault && m_ibDefault && m_indexCount > 0)
+    if (m_vbDefault && m_ibDefault && m_indexCount > 0)
     {
         m_cmdList->SetPipelineState(m_modelPso.Get());
         m_cmdList->SetGraphicsRootSignature(m_modelRootSig.Get());
@@ -153,7 +153,7 @@ void NativeRenderer::RenderFrame()
         m_cmdList->SetGraphicsRootConstantBufferView(0, m_cbUpload->GetGPUVirtualAddress());
 
         m_cmdList->DrawIndexedInstanced(m_indexCount, 1, 0, 0, 0);
-    }*/
+    }
 
     // Back to present
     auto toPresent = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -169,6 +169,36 @@ void NativeRenderer::RenderFrame()
 
     DX::ThrowIfFailed(m_swapChain->Present(1, 0));
     this->MoveToNextFrame();
+}
+
+void NativeRenderer::Resize(uint32_t width, uint32_t height)
+{
+    if (!m_device)
+    {
+        return;
+    }
+
+    if (!width || !height)
+    {
+        return;
+    }
+
+    m_width = width; 
+    m_height = height;
+
+    for (uint32_t i = 0; i < kFrameCount; ++i)
+    {
+        m_renderTargets[i].Reset();
+    }
+
+    DXGI_SWAP_CHAIN_DESC desc {}; 
+    m_swapChain->GetDesc(&desc);
+
+    DX::ThrowIfFailed(m_swapChain->ResizeBuffers(kFrameCount, m_width, m_height, desc.BufferDesc.Format, desc.Flags));
+
+    m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+    this->CreateRTVs();
 }
 
 void NativeRenderer::InitD3D12()
