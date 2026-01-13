@@ -123,7 +123,7 @@ void NativeRenderer::RenderFrame()
     float clear[4] = { 0.05f, 0.05f, 0.08f, 1.0f };
     m_cmdList->ClearRenderTargetView(rtv, clear, 0, nullptr);
 
-    // ---------- Draw background (fullscreen triangle) ----------
+    // ---------- Draw background ----------
     {
         ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
         m_cmdList->SetDescriptorHeaps(1, heaps);
