@@ -1,3 +1,5 @@
+# WIP
+
 # EarthInBeatsPlayer
 Media player with cool graphic interface and elements of social media, developed on C++ WinRT and C# UWP with using MF, xAudio2 and DirectX12.<br>
 The main feature is the 3D model of the Earth rendered on the main screen and rotating during music playback. And the social component is displaying<br>
