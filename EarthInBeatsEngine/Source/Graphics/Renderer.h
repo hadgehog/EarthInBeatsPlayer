@@ -46,7 +46,7 @@ namespace winrt::EarthInBeatsEngine::Graphics::implementation
 		void Manipulation(bool isManipulating);
 
 	private:
-		// TODO: return data except of out
+		// TODO: return data in other way than out param
 		Windows::Foundation::IAsyncAction LoadAssetFromAppxPath(const hstring& path, std::vector<uint8_t>& outData);
 
 	private:

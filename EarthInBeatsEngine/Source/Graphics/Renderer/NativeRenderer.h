@@ -3,12 +3,21 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <cstdint>
+#include <mutex>
+#include <algorithm>
+
 #include <wrl.h>
-#include <d3d12.h>
-#include <dxgi1_6.h>
-#include <DirectXMath.h>
 #include <winrt/base.h>
 #include <windows.ui.xaml.media.dxinterop.h>  // ISwapChainPanelNative
+
+// DirectX11
+#include <d3d11_4.h>        // ID3D11Device, ID3D11DeviceContext, IDXGISwapChain1
+#include <dxgi1_4.h>        // IDXGIFactory2, CreateSwapChainForComposition
+#include <DirectXMath.h>    // Matrices
+
+#include "RenderDataTypes.h"
+#include "ConstantBufferData.h"
 
 //#include "../Scene/Model.h"
 //#include "../Scene/Camera.h"
@@ -22,24 +31,25 @@ class NativeRenderer
 {
 public:
     NativeRenderer() = default;
-    virtual ~NativeRenderer();
+    virtual ~NativeRenderer() = default;
 
     void Initialize(
         const winrt::com_ptr<ISwapChainPanelNative>& panel,
-        uint32_t width,
-        uint32_t height,
+        const uint32_t width,
+        const uint32_t height,
         const std::vector<uint8_t>& model,
         const std::vector<uint8_t>& bgTex);
+    // const std::vector<uint8_t>& modelTextureOverride
 
     void RenderFrame();
 
-    void Resize(uint32_t width, uint32_t height);
+    void Resize(const uint32_t width, const uint32_t height);
 
 private:
-    void InitD3D12();
+    void InitD3D11();
     void CreateSwapChainForPanel();
-    void CreateRTVs();
-    void CreateSrvHeap();
+    void CreateBackBufferResources();
+    void ResizeSwapChain();
 
     void CreateBackgroundPipeline();
     void CreateModelPipeline();
@@ -47,119 +57,62 @@ private:
     void LoadBackgroundTexture(const std::vector<uint8_t>& texData);
     void LoadModelAssimp(const std::vector<uint8_t>& modelData);
 
-    void CreateBuffer_DefaultWithUpload(
-        size_t byteSize,
-        D3D12_RESOURCE_FLAGS flags,
-        D3D12_RESOURCE_STATES finalState,
-        Microsoft::WRL::ComPtr<ID3D12Resource>& outDefault,
-        Microsoft::WRL::ComPtr<ID3D12Resource>& outUpload);
-
-    void WaitForGpu();
-    void MoveToNextFrame();
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    //bool Initialize(
-    //    const winrt::com_ptr<ISwapChainPanelNative>& panel,
-    //    uint32_t width, uint32_t height,
-    //    const std::vector<uint8_t>& model,
-    //    const std::vector<uint8_t>& backgroundTexture,
-    //    const std::vector<uint8_t>& modelTextureOverride);
-    //
-    //void Resize(uint32_t width, uint32_t height);
-    //
-    //void Draw();  // draws background + model
-    //void Shutdown();
-    //
-    //// Input surface
-    //void SetRotation(float yaw, float pitch);
-    //void SetZoom(float delta);
-    //void OnMouseDrag(float dx, float dy);
-    //void OnMouseWheel(int delta, bool ctrlDown);
-    //void OnKeyDown(WPARAM key);
-    //
-    //Camera& GetCamera();
-    //
-    // TODO: implement
-    //void LoadModel(const std::string& path);
-    //void LoadTexture(const std::string& path);
-    //void LoadBackground(const std::string& path);
-    //
-    //protected:
-    //    void BeginFrame();
-    //    void EndFrame();
-    //
-    //private:
-    //    bool CreateDeviceAndSwapchain();
-    //    void CreateRenderTargetView(uint32_t w, uint32_t h);
-    //    void CreatePipelineStates();
-    //    void CreateConstantBuffers();
-    //    UploadContext& GetUploadContext();
-    //
-    //    void DrawBackground();
-    //    void DrawModel();
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 private:
     static constexpr uint32_t kFrameCount = 2;
 
-    winrt::com_ptr<ISwapChainPanelNative> m_panel { nullptr };
-   
-    // Core D3D
-    Microsoft::WRL::ComPtr<ID3D12Device> m_device;
-    Microsoft::WRL::ComPtr<IDXGISwapChain3> m_swapChain;
-    Microsoft::WRL::ComPtr<ID3D12CommandQueue> m_cmdQueue;
-    Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_cmdAllocator[kFrameCount];
-    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> m_cmdList;
-    uint32_t m_frameIndex = 0;
+    // native winrt swap chain panel
+    winrt::com_ptr<ISwapChainPanelNative> m_nativePanel { nullptr };
 
-    // Descriptors
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-    UINT m_rtvDescriptorSize = 0;
+    // D3D11 core
+    Microsoft::WRL::ComPtr<ID3D11Device>        m_d3d11Device;
+    Microsoft::WRL::ComPtr<ID3D11DeviceContext> m_d3d11Context;
 
-    // Render targets
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_renderTargets[kFrameCount];
+    // swapchain for SwapChainPanel
+    Microsoft::WRL::ComPtr<IDXGISwapChain1>         m_dxgiSwapChain;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView>  m_renderTargetView;
 
-    // Sync
-    Microsoft::WRL::ComPtr<ID3D12Fence> m_fence;
-    HANDLE m_fenceEvent = nullptr;
-    uint64_t m_fenceValue = 0;
+    // background
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>          m_bgVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>           m_bgPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout>           m_bgInputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>                m_bgConstantBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>    m_bgShaderResourceView;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState>          m_sampler;
 
-    // Viewport
+    // model buffers
+    DX::MeshData m_modelMesh;   // move to Model class
+    uint32_t m_indexCount = 0;  // TODO: remove
+
+    DX::ConstantBufferData m_modelCBData;
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_modelVertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_modelIndexBuffer;
+
+    // model pipeline
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_modelVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>  m_modelPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout>  m_modelInputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>       m_modelConstantBuffer;
+
+    // state: position, camera, resize
+    std::mutex m_stateMutex;
+
     uint32_t m_width = 1920;
     uint32_t m_height = 1200;
 
-    // Background
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_bgTexture;      // DEFAULT heap
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_bgUpload;       // UPLOAD heap
-    Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_srvHeap;  // CBV/SRV/UAV
+    bool m_pendingResize = true;
 
-    // Root+PSO
-    Microsoft::WRL::ComPtr<ID3D12RootSignature> m_bgRootSig;
-    Microsoft::WRL::ComPtr<ID3D12PipelineState> m_bgPso;
+    DirectX::XMFLOAT3 m_modelCenter { 0,0,0 };
+    float m_modelScale = 1.0f;
 
-    // Model
-    struct Vertex
-    {
-        float px, py, pz;
-    };
 
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_vbDefault;
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_vbUpload;
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_ibDefault;
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_ibUpload;
 
-    D3D12_VERTEX_BUFFER_VIEW m_vbView{};
-    D3D12_INDEX_BUFFER_VIEW  m_ibView{};
-    UINT m_indexCount = 0;
 
-    // Constant buffer (upload)
-    Microsoft::WRL::ComPtr<ID3D12Resource> m_cbUpload;
-    uint8_t* m_cbMapped = nullptr;
 
-    Microsoft::WRL::ComPtr<ID3D12RootSignature> m_modelRootSig;
-    Microsoft::WRL::ComPtr<ID3D12PipelineState> m_modelPso;
+
+
+
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

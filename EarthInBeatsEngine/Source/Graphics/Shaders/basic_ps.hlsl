@@ -1,20 +1,21 @@
-struct VSOutput
+Texture2D tex : register(t0);
+SamplerState texSampler : register(s0);
+
+cbuffer Cbuffer0 : register(b0) 
 {
-    float4 pos : SV_POSITION;
-    float3 norm : NORMAL;
-    float2 uv : TEXCOORD0;
+	matrix ColorMtrx;
 };
 
-Texture2D gBaseColor : register(t0);
-SamplerState gSample : register(s0);
-
-float4 main(VSOutput pin) : SV_Target
+struct PsInput 
 {
-    float3 lightDir = normalize(float3(0.3f, 0.6f, 0.5f));
-    float3 n = normalize(pin.norm);
-    float ndl = saturate(dot(n, lightDir));
-    float3 base = gBaseColor.Sample(gSample, pin.uv).rgb;
-    float3 lit = base * (0.25 + 0.75 * ndl);
-    
-    return float4(lit, 1.0);
+	float4 pos : SV_POSITION;
+	float3 normal : NORMAL0;
+	float2 tex : TEXCOORD0;
+};
+
+float4 main(PsInput input) : SV_TARGET
+{
+	float4 color = tex.Sample(texSampler, input.tex);
+
+	return color;
 }

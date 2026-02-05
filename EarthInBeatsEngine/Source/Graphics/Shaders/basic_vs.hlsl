@@ -1,34 +1,38 @@
-cbuffer CameraCB : register(b0)
+cbuffer MVPConstantBuffer : register(b0)
 {
-    float4x4 viewProj;
-}
-
-cbuffer ObjectCB : register(b1)
-{
-    float4x4 model;
-}
-
-struct VSInput
-{
-    float3 pos : POSITION;
-    float3 norm : NORMAL;
-    float2 uv : TEXCOORD0;
+	matrix model;
+	matrix view;
+	matrix projection;
 };
 
-struct VSOutput
+struct VsInput
 {
-    float4 pos : SV_POSITION;
-    float3 norm : NORMAL;
-    float2 uv : TEXCOORD0;
+	float3 pos : POSITION;
+	float3 normal : NORMAL0;
+	float2 tex : TEXCOORD0;
 };
 
-VSOutput main(VSInput vin)
+struct PsInput
 {
-    VSOutput v;
-    float4 wpos = mul(float4(vin.pos, 1.0f), model);
-    v.pos = mul(wpos, viewProj);
-    v.norm = mul(float4(vin.norm, 0.0f), model).xyz;
-    v.uv = vin.uv;
-    
-    return v;
+	float4 pos : SV_POSITION;
+	float3 normal : NORMAL0;
+	float2 tex : TEXCOORD0;
+};
+
+PsInput main(VsInput input)
+{
+	PsInput output;
+
+	float4 pos = float4(input.pos, 1.0f);
+	float3 normal = input.normal;
+
+	pos = mul(pos, model);
+	pos = mul(pos, view);
+	pos = mul(pos, projection);
+
+	output.pos = pos;
+	output.normal = normal;
+	output.tex = input.tex;
+
+	return output;
 }

@@ -25,11 +25,19 @@
     <ClCompile Include="Source\Graphics\Scene\Mesh.cpp" />
     <ClCompile Include="Source\Graphics\Scene\Model.cpp" />
     <ClCompile Include="Source\Graphics\Scene\TextureManager.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Base\D12Device.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Commands\D12CommandList.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Commands\D12CommandQueue.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Descriptors\D12DescriptorHeap.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\MemoryManagement\BufferUploader.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Pipeline\D12PipelineState.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Pipeline\D12RootSignature.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Pipeline\HLSLShader.cpp" />
+    <ClCompile Include="Source\Graphics\DirectX12\Resource\D12Resource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="EarthInBeatsEngine.def" />
     <None Include="packages.config" />
-    <None Include="$(MSBuildThisFileDirectory)../..//build/native/bin/x64\Assimp64.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropertySheet.props" />
@@ -60,6 +68,17 @@
     <ClInclude Include="Source\Graphics\Renderer\UploadContext.h" />
     <ClInclude Include="Source\Graphics\Scene\Material.h" />
     <ClInclude Include="Source\Graphics\Scene\TextureManager.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Base\D12Device.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Commands\D12CommandList.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Commands\D12CommandQueue.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Descriptors\D12DescriptorHeap.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\MemoryManagement\BufferUploader.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Pipeline\D12PipelineState.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Pipeline\D12RootSignature.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Pipeline\HLSLShader.h" />
+    <ClInclude Include="Source\Graphics\DirectX12\Resource\D12Resource.h" />
+    <ClInclude Include="Source\Graphics\Renderer\RenderDataTypes.h" />
+    <ClInclude Include="Source\Graphics\Renderer\ConstantBufferData.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="Source\AudioPlayer\AudioPlayer.idl" />

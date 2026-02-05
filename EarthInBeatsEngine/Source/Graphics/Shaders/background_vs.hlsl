@@ -1,28 +1,34 @@
-struct VSOut
+cbuffer MVPConstantBuffer : register(b0) 
 {
-    float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD0;
+	matrix model;
+	matrix view;
+	matrix projection;
 };
 
-VSOut main(uint vid : SV_VertexID)
+struct VsInput 
 {
-    float2 pos[3] =
-    {
-        float2(-1.0, -1.0),
-        float2(-1.0, 3.0),
-        float2(3.0, -1.0)
-    };
-    
-    float2 uv[3] =
-    {
-        float2(0.0, 1.0),
-        float2(0.0, -1.0),
-        float2(2.0, 1.0)
-    };
+	float3 pos : POSITION;
+	float2 tex : TEXCOORD0;
+};
 
-    VSOut output;
-    output.pos = float4(pos[vid], 0.0, 1.0);
-    output.uv = uv[vid];
-    
-    return output;
+struct PsInput 
+{
+	float4 pos : SV_POSITION;
+	float2 tex : TEXCOORD0;
+};
+
+PsInput main(VsInput input) 
+{
+	PsInput output;
+
+	float4 pos = float4(input.pos, 1.0f);
+
+	pos = mul(pos, model);
+	pos = mul(pos, view);
+	pos = mul(pos, projection);
+
+	output.pos = pos;
+	output.tex = input.tex;
+
+	return output;
 }

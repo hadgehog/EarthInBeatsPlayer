@@ -20,6 +20,7 @@ echo Starting CMake configuration for UWP x64...
 
 cmake -S . -B %BUILD_DIR% ^
 -G "Visual Studio 17 2022" -A x64 ^
+-DCMAKE_BUILD_TYPE=Debug ^
 -DCMAKE_SYSTEM_NAME=WindowsStore ^
 -DCMAKE_SYSTEM_VERSION=10.0.26100 ^
 -DASSIMP_BUILD_ASSIMP_TOOLS=OFF ^

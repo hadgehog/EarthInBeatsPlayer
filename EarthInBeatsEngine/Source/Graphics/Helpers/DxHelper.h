@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include <ppltasks.h>	// For create_task
-#include <d3d12.h>
-#include <dxgi1_6.h>
 #include <cassert>
 #include <string>
 #include <iostream>
+#include <wrl.h>
+#include <d3d11_4.h>
+#include <d3dcompiler.h>
 
 #define G_MAX_SWAPCHAIN_BUFFERS 2
 
@@ -98,7 +99,7 @@ namespace DX
 
 			fileData.resize(static_cast<size_t>(fileSize.QuadPart));
 
-			if (!ReadFile(file, fileData.data(), fileData.size(), &readed, nullptr))
+			if (!ReadFile(file, fileData.data(), (DWORD)fileData.size(), &readed, nullptr))
 			{
 				CloseHandle(file);
 
@@ -112,5 +113,39 @@ namespace DX
 		}
 
 		return fileData;
+	}
+
+	inline Microsoft::WRL::ComPtr<ID3DBlob> CompileHlsl(const char* source, const char* entry, const char* target)
+	{
+		UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+#if defined(_DEBUG)
+		flags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+		flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
+#endif
+
+		Microsoft::WRL::ComPtr<ID3DBlob> code;
+		Microsoft::WRL::ComPtr<ID3DBlob> err;
+
+		HRESULT hr = D3DCompile(
+			source, std::strlen(source),
+			nullptr, nullptr, nullptr,
+			entry, target, flags, 0,
+			code.ReleaseAndGetAddressOf(),
+			err.ReleaseAndGetAddressOf());
+
+		if (FAILED(hr))
+		{
+			std::string msg = "D3DCompile failed";
+
+			if (err)
+			{
+				msg += ": " + std::string((const char*)err->GetBufferPointer(), err->GetBufferSize());
+			}
+
+			throw std::runtime_error(msg);
+		}
+
+		return code;
 	}
 }

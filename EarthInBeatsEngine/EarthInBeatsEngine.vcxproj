@@ -110,7 +110,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsWinRT>
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</CompileAsWinRT>
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</CompileAsWinRT>
@@ -209,7 +209,9 @@ echo Copy complete</Command>
     <ClInclude Include="Source\Graphics\Helpers\d3dx12.h" />
     <ClInclude Include="Source\Graphics\Helpers\DxHelper.h" />
     <ClInclude Include="Source\Graphics\Helpers\ISingleton.h" />
+    <ClInclude Include="Source\Graphics\Renderer\ConstantBufferData.h" />
     <ClInclude Include="Source\Graphics\Renderer\NativeRenderer.h" />
+    <ClInclude Include="Source\Graphics\Renderer\RenderDataTypes.h" />
     <ClInclude Include="Source\Graphics\Renderer\UploadContext.h" />
     <ClInclude Include="Source\Graphics\Scene\Camera.h" />
     <ClInclude Include="Source\Graphics\Scene\Material.h" />

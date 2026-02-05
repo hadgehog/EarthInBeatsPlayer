@@ -15,6 +15,7 @@ protected:
 	virtual ~ISingleton() = default;
 	ISingleton(ISingleton&&) = default;
 	ISingleton& operator=(ISingleton&&) = default;
+
 	ISingleton(const ISingleton&) = delete;
 	ISingleton& operator=(const ISingleton&) = delete;
 };

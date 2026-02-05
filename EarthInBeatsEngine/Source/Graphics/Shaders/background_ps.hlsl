@@ -1,13 +1,20 @@
-struct VSOut
+Texture2D tex : register(t0);
+SamplerState texSampler : register(s0);
+
+cbuffer Cbuffer0 : register(b0) 
 {
-    float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD0;
+	matrix ColorMtrx;
 };
 
-Texture2D gTex : register(t0);
-SamplerState gSamp : register(s0);
-
-float4 main(VSOut i) : SV_Target
+struct PsInput 
 {
-    return float4(gTex.Sample(gSamp, i.uv).rgb, 1.0);
+	float4 pos : SV_POSITION;
+	float2 tex : TEXCOORD0;
+};
+
+float4 main(PsInput input) : SV_TARGET
+{
+	float4 color = tex.Sample(texSampler, input.tex);
+
+	return color;
 }
