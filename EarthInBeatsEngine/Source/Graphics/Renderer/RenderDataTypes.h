@@ -18,4 +18,11 @@ namespace DX
 		std::vector<Vertex> Vertices;
 		std::vector<uint32_t> Indices;
 	};
+
+	struct VertexStreams
+	{
+		std::vector<DirectX::XMFLOAT3> PositionStream;
+		std::vector<DirectX::XMFLOAT3> NormalStream;
+		std::vector<DirectX::XMFLOAT2> TexcoordStream;
+	};
 }

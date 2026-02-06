@@ -24,8 +24,13 @@
 //#include "../Scene/TextureManager.h"
 //#include "UploadContext.h"
 
-// TODO: add error text everywhere in ThrowIfFailed
-// TODO: add the namespace
+
+/// TODO:
+/// 1. Add INativeRenderer interface, inherit NativeRendererDX11, NativeRendererDX12, etc... maybe even NativeRendererOpenGL 
+/// 2. Add namespace GraphicsEngine for for entire renderer, and GraphicsEngine::DX for all helpers. AudioEngine for Audio (check smart pointers usage)
+/// 3. Add error messages everywhere in ThrowIfFailed
+/// 4. Implement engine like the scene with a list of Models and Backgrounds with Init and Draw methods, and Camera (use DirectX tutorial and OpenGL test project as referrences)
+
 
 class NativeRenderer
 {
@@ -38,8 +43,8 @@ public:
         const uint32_t width,
         const uint32_t height,
         const std::vector<uint8_t>& model,
-        const std::vector<uint8_t>& bgTex);
-    // const std::vector<uint8_t>& modelTextureOverride
+        const std::vector<uint8_t>& bgTex,
+        const std::vector<uint8_t>& modelTex);
 
     void RenderFrame();
 
@@ -56,6 +61,7 @@ private:
 
     void LoadBackgroundTexture(const std::vector<uint8_t>& texData);
     void LoadModelAssimp(const std::vector<uint8_t>& modelData);
+    void LoadModelTexture(const std::vector<uint8_t>& modelTexData);
 
 private:
     static constexpr uint32_t kFrameCount = 2;
@@ -87,6 +93,8 @@ private:
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_modelVertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> m_modelIndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_modelNormalBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_modelTextureBuffer;
 
     // model pipeline
     Microsoft::WRL::ComPtr<ID3D11VertexShader> m_modelVertexShader;

@@ -13,7 +13,8 @@ void NativeRenderer::Initialize(
     const uint32_t width,
     const uint32_t height,
 	const std::vector<uint8_t>& model, 
-	const std::vector<uint8_t>& bgTex)
+	const std::vector<uint8_t>& bgTex,
+    const std::vector<uint8_t>& modelTex)
 {
     m_nativePanel = panel;
 
@@ -29,13 +30,14 @@ void NativeRenderer::Initialize(
 
 	this->LoadBackgroundTexture(bgTex);
 	this->LoadModelAssimp(model);
+    this->LoadModelTexture(modelTex);
 
 	this->RenderFrame();
 }
 
 void NativeRenderer::RenderFrame()
 {
-    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(0), DirectX::XMMatrixTranslation(0, 0, 10));
+    DirectX::XMMATRIX modelMatrix = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationRollPitchYaw(0.0f, DirectX::XMConvertToRadians(250.0f), 0.0f), DirectX::XMMatrixTranslation(0, 0, 10));
 
     modelMatrix = DirectX::XMMatrixMultiply(
         modelMatrix,
@@ -45,7 +47,7 @@ void NativeRenderer::RenderFrame()
     DirectX::XMStoreFloat4x4(&this->m_modelCBData.model, DirectX::XMMatrixTranspose(modelMatrix));
 
     // set viewport
-    D3D11_VIEWPORT vp { 0 };
+    D3D11_VIEWPORT vp { };
     vp.Width = (float)m_width;
     vp.Height = (float)m_height;
     vp.MinDepth = 0.0f;
@@ -80,12 +82,13 @@ void NativeRenderer::RenderFrame()
     // ---------- model ----------
     if (m_modelVertexBuffer && m_modelIndexBuffer && m_indexCount > 0)
     {
-        UINT stride = sizeof(DX::Vertex);
+        UINT stride = sizeof(DirectX::XMFLOAT3);
         UINT offset = 0;
 
         m_d3d11Context->IASetVertexBuffers(0, 1, m_modelVertexBuffer.GetAddressOf(), &stride, &offset);
-        //m_d3d11Context->IASetVertexBuffers(1, 1, m_modelNormalBuffer.GetAddressOf(), &stride, &offset);
-        //m_d3d11Context->IASetVertexBuffers(2, 1, m_modelTextureBuffer.GetAddressOf(), &stride, &offset);
+        m_d3d11Context->IASetVertexBuffers(1, 1, m_modelNormalBuffer.GetAddressOf(), &stride, &offset);
+        stride = sizeof(DirectX::XMFLOAT2);
+        m_d3d11Context->IASetVertexBuffers(2, 1, m_modelTextureBuffer.GetAddressOf(), &stride, &offset);
         m_d3d11Context->IASetIndexBuffer(m_modelIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         m_d3d11Context->IASetInputLayout(m_modelInputLayout.Get());
         m_d3d11Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -325,7 +328,7 @@ void NativeRenderer::CreateModelPipeline()
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
 
-    auto numElements = sizeof(modelInputLayout) / sizeof(modelInputLayout[0]);
+    UINT numElements = (UINT)(sizeof(modelInputLayout) / sizeof(modelInputLayout[0]));
 
     DX::ThrowIfFailed(m_d3d11Device->CreateInputLayout(
         modelInputLayout, numElements,
@@ -335,7 +338,7 @@ void NativeRenderer::CreateModelPipeline()
     m_d3d11Context->IASetInputLayout(m_modelInputLayout.Get());
     m_d3d11Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    D3D11_BUFFER_DESC constBuff { 0 };
+    D3D11_BUFFER_DESC constBuff { };
     constBuff.Usage = D3D11_USAGE_DEFAULT;
     constBuff.ByteWidth = sizeof(DX::ConstantBufferData);
     constBuff.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -349,6 +352,24 @@ void NativeRenderer::CreateModelPipeline()
     DirectX::XMStoreFloat4x4(&m_modelCBData.model, DirectX::XMMatrixTranspose(DirectX::XMMatrixTranslation(0, 0, 2)));
     DirectX::XMStoreFloat4x4(&m_modelCBData.view, DirectX::XMMatrixTranspose(view));
     DirectX::XMStoreFloat4x4(&m_modelCBData.projection, DirectX::XMMatrixIdentity());
+
+    float aspectRatio = (float)m_width / (float)m_height;
+    float fovAngleY = 90.0f * DirectX::XM_PI / 180.0f;
+
+    DirectX::XMMATRIX orthoMatrix = DirectX::XMMatrixOrthographicLH(aspectRatio * 15.0f, 15.0f, 0.1f, 100.0f);
+    DirectX::XMFLOAT4X4 orientation = DirectX::XMFLOAT4X4 
+    (
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    );
+    DirectX::XMMATRIX orientationMatrix = XMLoadFloat4x4(&orientation);
+
+    DirectX::XMStoreFloat4x4(
+        &m_modelCBData.projection,
+        XMMatrixTranspose(orthoMatrix* orientationMatrix)
+    );
 }
 
 void NativeRenderer::LoadBackgroundTexture(const std::vector<uint8_t>& texData)
@@ -393,7 +414,7 @@ void NativeRenderer::LoadModelAssimp(const std::vector<uint8_t>& modelData)
         return;
 
     Assimp::Importer importer;
-    unsigned flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenNormals;
+    unsigned flags = aiProcess_Triangulate | aiProcess_GenNormals;
     const aiScene* scene = importer.ReadFileFromMemory(modelData.data(), modelData.size(), flags);
 
     if (!scene || !scene->mRootNode) 
@@ -443,33 +464,46 @@ void NativeRenderer::LoadModelAssimp(const std::vector<uint8_t>& modelData)
         for (uint32_t i = 0; i < vertexCount; ++i)
         {
             m_modelMesh.Vertices[i].Position = DirectX::XMFLOAT3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        }
 
-        if (mesh->HasNormals())
-        {
-            for (uint32_t i = 0; i < vertexCount; ++i)
+            if (mesh->HasNormals())
             {
                 DirectX::XMVECTOR xvNormal = DirectX::XMLoadFloat3((DirectX::XMFLOAT3*)&mesh->mNormals[i]);
                 xvNormal = DirectX::XMVector3Normalize(xvNormal);
 
                 DirectX::XMStoreFloat3(&m_modelMesh.Vertices[i].Normal, xvNormal);
             }
-        }
 
-        if (mesh->HasTextureCoords(0))
-        {
-            for (uint32_t i = 0; i < vertexCount; ++i)
+            if (mesh->HasTextureCoords(0))
             {
                 m_modelMesh.Vertices[i].TexCoord = DirectX::XMFLOAT2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
             }
         }
     }
+    else
+    {
+        throw std::runtime_error("Assimp error: empty vertices!");
+    }
 
-    const size_t ibSize = m_modelMesh.Indices.size() * sizeof(uint32_t);
-    const size_t vbSize = m_modelMesh.Vertices.size() * sizeof(DX::Vertex);
+    const size_t ibSize = m_indexCount * sizeof(uint32_t);  // indices
+    const size_t vbSize = m_modelMesh.Vertices.size() * sizeof(DirectX::XMFLOAT3);  // vertices, normals
+    const size_t tbSize = m_modelMesh.Vertices.size() * sizeof(DirectX::XMFLOAT2);  // texture coords
+
+    auto FillVertexStreams = [](const std::vector<DX::Vertex>& vertices)
+    {
+            DX::VertexStreams vs;
+
+            for (const auto& v : vertices)
+            {
+                vs.PositionStream.push_back(v.Position);
+                vs.NormalStream.push_back(v.Normal);
+                vs.TexcoordStream.push_back(v.TexCoord);
+            }
+
+            return vs;
+    };
 
     // Create Index buffer
-    D3D11_BUFFER_DESC indexBufferDesc { 0 };
+    D3D11_BUFFER_DESC indexBufferDesc { };
     indexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     indexBufferDesc.ByteWidth = (UINT)ibSize;
     indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -477,21 +511,60 @@ void NativeRenderer::LoadModelAssimp(const std::vector<uint8_t>& modelData)
     indexBufferDesc.MiscFlags = 0;
     indexBufferDesc.StructureByteStride = 0;
 
-    D3D11_SUBRESOURCE_DATA indexInitData { 0 };
+    D3D11_SUBRESOURCE_DATA indexInitData { };
     indexInitData.pSysMem = m_modelMesh.Indices.data();
 
     DX::ThrowIfFailed(m_d3d11Device->CreateBuffer(&indexBufferDesc, &indexInitData, m_modelIndexBuffer.ReleaseAndGetAddressOf()));
 
+    // fill vertex, nolrmal, and texcoord lists
+    auto vertexStreams = FillVertexStreams(m_modelMesh.Vertices);
+
     // Create Vertex Buffer
-    D3D11_BUFFER_DESC vertexBufferDesc { 0 };
+    D3D11_BUFFER_DESC vertexBufferDesc { };
     vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
     vertexBufferDesc.ByteWidth = (UINT)vbSize;
     vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vertexBufferDesc.CPUAccessFlags = 0;
     vertexBufferDesc.MiscFlags = 0;
 
-    D3D11_SUBRESOURCE_DATA vertexInitData { 0 };
-    vertexInitData.pSysMem = m_modelMesh.Vertices.data();
+    D3D11_SUBRESOURCE_DATA vertexInitData { };
+    vertexInitData.pSysMem = vertexStreams.PositionStream.data();
 
     DX::ThrowIfFailed(m_d3d11Device->CreateBuffer(&vertexBufferDesc, &vertexInitData, m_modelVertexBuffer.ReleaseAndGetAddressOf()));
+
+    // Create Normal Buffer
+    D3D11_BUFFER_DESC normalBufferDesc { };
+    normalBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+    normalBufferDesc.ByteWidth = (UINT)vbSize;
+    normalBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    normalBufferDesc.CPUAccessFlags = 0;
+    normalBufferDesc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA normalBufferData { };
+    normalBufferData.pSysMem = vertexStreams.NormalStream.data();
+
+    DX::ThrowIfFailed(m_d3d11Device->CreateBuffer(&normalBufferDesc, &normalBufferData, m_modelNormalBuffer.GetAddressOf()));
+
+    // Create Texture Buffer 
+    D3D11_BUFFER_DESC textureBufferDesc { };
+    textureBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    textureBufferDesc.ByteWidth = (UINT)tbSize;
+    textureBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    textureBufferDesc.CPUAccessFlags = 0;
+    textureBufferDesc.MiscFlags = 0;
+
+    for (auto& texCoord : vertexStreams.TexcoordStream)
+    {
+        texCoord.x *= -1;
+        texCoord.y *= -1;
+    }
+
+    D3D11_SUBRESOURCE_DATA textureBufferData { };
+    textureBufferData.pSysMem = vertexStreams.TexcoordStream.data();
+
+    DX::ThrowIfFailed(m_d3d11Device->CreateBuffer(&textureBufferDesc, &textureBufferData, m_modelTextureBuffer.GetAddressOf()));
+}
+
+void NativeRenderer::LoadModelTexture(const std::vector<uint8_t>& modelTexData)
+{
 }
