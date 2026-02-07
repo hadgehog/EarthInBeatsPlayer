@@ -30,6 +30,7 @@
 /// 2. Add namespace GraphicsEngine for for entire renderer, and GraphicsEngine::DX for all helpers. AudioEngine for Audio (check smart pointers usage)
 /// 3. Add error messages everywhere in ThrowIfFailed
 /// 4. Implement engine like the scene with a list of Models and Backgrounds with Init and Draw methods, and Camera (use DirectX tutorial and OpenGL test project as referrences)
+/// 5. Move d3d11 into separate class and make it Singleton 
 
 
 class NativeRenderer
